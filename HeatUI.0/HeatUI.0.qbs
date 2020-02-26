@@ -39,28 +39,28 @@ Project {
 			Depends { name: "CuteHMI.2" }
 		}
 
-		FileTagger {
-			patterns: "*.fbx"
-			fileTags: ["fbx"]
-		}
+//		FileTagger {
+//			patterns: "*.fbx"
+//			fileTags: ["fbx"]
+//		}
 
-		FileTagger {
-			patterns: "*.obj"
-			fileTags: ["obj"]
-		}
+//		FileTagger {
+//			patterns: "*.obj"
+//			fileTags: ["obj"]
+//		}
 
-		FileTagger {
-			patterns: "*.png"
-			fileTags: ["png"]
-		}
+//		FileTagger {
+//			patterns: "*.png"
+//			fileTags: ["png"]
+//		}
 
-		Group {
-			name: "3D assets"
-			fileTagsFilter: ["fbx", "obj", "png"]
-			qbs.install: true
-			qbs.installSourceBase: installSourceBase
-			qbs.installDir: dedicatedInstallSubdir
-		}
+//		Group {
+//			name: "3D assets"
+//			fileTagsFilter: ["fbx", "obj", "png"]
+//			qbs.install: true
+//			qbs.installSourceBase: installSourceBase
+//			qbs.installDir: dedicatedInstallSubdir
+//		}
 	}
 }
 

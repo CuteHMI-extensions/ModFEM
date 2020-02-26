@@ -5,9 +5,7 @@ import cutehmi
 Project {
 	name: "ModFEM.QtHeat.0"
 
-	//	condition: false
-
-	cutehmi.Extension {
+	cutehmi.CppExtension {
 		name: parent.name
 
 		friendlyName: "Heat Qt interface"
@@ -20,7 +18,14 @@ Project {
 
 		files: [
          "include/modfem/qtheat/Controller.hpp",
+         "include/modfem/qtheat/internal/common.hpp",
+         "include/modfem/qtheat/internal/platform.hpp",
+         "include/modfem/qtheat/logging.hpp",
+         "include/modfem/qtheat/metadata.hpp",
          "src/modfem/qtheat/Controller.cpp",
+         "src/modfem/qtheat/internal/QMLPlugin.cpp",
+         "src/modfem/qtheat/internal/QMLPlugin.hpp",
+         "src/modfem/qtheat/logging.cpp",
      ]
 
 		Depends { name: "CuteHMI.2" }
@@ -36,8 +41,14 @@ Project {
 
 		Depends { name: "cutehmi.qmltypes" }
 
+		Depends { name: "modfem.config" }
+
+		Depends { name: "ModFEM.pd_heat.2" }
+
 		Export {
 			Depends { name: "CuteHMI.2" }
+
+			Depends { name: "ModFEM.pd_heat.2" }
 		}
 	}
 }
