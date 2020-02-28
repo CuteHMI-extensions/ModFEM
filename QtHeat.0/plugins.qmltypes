@@ -9,20 +9,37 @@ import QtQuick.tooling 1.2
 Module {
     dependencies: []
     Component {
-        name: "modfem::qtheat::Controller"
+        name: "modfem::qtheat::Mesh"
         prototype: "QObject"
-        exports: ["ModFEM.QtHeat/Controller 0.0"]
+        exports: ["ModFEM.QtHeat/Mesh 0.0"]
         exportMetaObjectRevisions: [0]
-        Property { name: "problemDirectory"; type: "string" }
+        Property { name: "nodeCount"; type: "int"; isReadonly: true }
+        Property { name: "nodeData"; type: "QByteArray"; isReadonly: true }
+        Method {
+            name: "init"
+            Parameter { name: "meshId"; type: "int" }
+        }
+    }
+    Component {
+        name: "modfem::qtheat::Problem"
+        prototype: "QObject"
+        exports: ["ModFEM.QtHeat/Problem 0.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "directory"; type: "string" }
         Property { name: "problemId"; type: "int" }
         Property { name: "meshId"; type: "int" }
         Property { name: "fieldId"; type: "int" }
         Property { name: "solutionCount"; type: "int" }
         Property { name: "equationCount"; type: "int" }
+        Property { name: "mesh"; type: "Mesh"; isReadonly: true; isPointer: true }
+        Property { name: "buffer"; type: "Qt3DRender::QBuffer"; isReadonly: true; isPointer: true }
+        Property { name: "meshData"; type: "QByteArray"; isReadonly: true }
         Method {
-            name: "setProblemDirectoryFromURL"
+            name: "setDirectoryFromURL"
             Parameter { name: "url"; type: "QUrl" }
         }
         Method { name: "init" }
+        Method { name: "resetMeshData" }
+        Method { name: "resetBuffer" }
     }
 }

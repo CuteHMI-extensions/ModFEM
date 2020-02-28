@@ -11,32 +11,34 @@ Item {
 	anchors.fill: parent
 	anchors.margins: 10
 
-	Controller {
-		id: heat
+	Problem {
+		id: heatProblem
 	}
 
-	Row {
-		spacing: 10
+	RowLayout {
+		anchors.fill: parent
 
 		Column {
+			Layout.alignment: Qt.AlignTop
+
 			Label {
-				text: qsTr("Problem id: ") + heat.problemId
+				text: qsTr("Problem id: ") + heatProblem.problemId
 			}
 
 			Label {
-				text: qsTr("Mesh id: ") + heat.meshId
+				text: qsTr("Mesh id: ") + heatProblem.meshId
 			}
 
 			Label {
-				text: qsTr("Field id: ") + heat.fieldId
+				text: qsTr("Field id: ") + heatProblem.fieldId
 			}
 
 			Label {
-				text: qsTr("Solution count: ") + heat.solutionCount
+				text: qsTr("Solution count: ") + heatProblem.solutionCount
 			}
 
 			Label {
-				text: qsTr("Equation count: ") + heat.equationCount
+				text: qsTr("Equation count: ") + heatProblem.equationCount
 			}
 		}
 
@@ -47,34 +49,56 @@ Item {
 				}
 
 				TextField {
-					id: problemDirectoryTextField
-					text: heat.problemDirectory
+					id: directoryTextField
+					text: heatProblem.directory
 					selectByMouse: true
 
-					onEditingFinished: heat.problemDirectory = text
+					onEditingFinished: heatProblem.directory = text
 				}
 
 				Button {
 					text: qsTr("Browse...")
-					onClicked: problemDirectoryDialog.open()
+					onClicked: directoryDialog.open()
 				}
 
 				FolderDialog {
-					id: problemDirectoryDialog
-					currentFolder: heat.problemDirectory
+					id: directoryDialog
+					currentFolder: heatProblem.directory
 
-					onAccepted: heat.setProblemDirectoryFromURL(folder)
+					onAccepted: heatProblem.setDirectoryFromURL(folder)
 				}
-
 			}
 
-			Button {
-				text: "Init"
+			Row {
+				spacing: 5
 
-				onClicked: heat.init()
+				Button {
+					text: "Init"
+
+					onClicked: heatProblem.init()
+				}
+
+				Button {
+					text: "Reset buffer"
+
+					onClicked: heatProblem.resetBuffer()
+				}
+			}
+
+			Rectangle {
+				Layout.fillHeight: true
+				Layout.fillWidth: true
+				color: "black"
+
+				Scene3D {
+					id: scene3d
+
+					anchors.fill: parent
+
+//					controller: heat
+				}
 			}
 		}
 	}
-
 
 }

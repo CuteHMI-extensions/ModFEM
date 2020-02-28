@@ -17,16 +17,20 @@ Project {
 		description: "Heat user interface."
 
 		files: [
-         "include/modfem/qtheat/Controller.hpp",
+         "include/modfem/qtheat/Mesh.hpp",
+         "include/modfem/qtheat/Problem.hpp",
          "include/modfem/qtheat/internal/common.hpp",
          "include/modfem/qtheat/internal/platform.hpp",
          "include/modfem/qtheat/logging.hpp",
          "include/modfem/qtheat/metadata.hpp",
-         "src/modfem/qtheat/Controller.cpp",
+         "src/modfem/qtheat/Mesh.cpp",
+         "src/modfem/qtheat/Problem.cpp",
          "src/modfem/qtheat/internal/QMLPlugin.cpp",
          "src/modfem/qtheat/internal/QMLPlugin.hpp",
          "src/modfem/qtheat/logging.cpp",
      ]
+
+		Depends { name: "Qt.3drender" }
 
 		Depends { name: "CuteHMI.2" }
 

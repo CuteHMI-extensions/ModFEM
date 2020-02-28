@@ -1,7 +1,8 @@
-#include "../../../include/modfem/qtheat/Controller.hpp"
+#include "../../../include/modfem/qtheat/Problem.hpp"
 
 #include <QSettings>
 #include <QDir>
+#include <QDataStream>
 
 #include <cstdlib>
 #include <iostream>
@@ -88,66 +89,88 @@ double pdr_heat_initial_condition(
 namespace modfem {
 namespace qtheat {
 
-Controller::Controller(QObject * parent):
+Problem::Problem(QObject * parent):
 	QObject(parent),
-	m(new Members{".", 0, 0, 0, 0, 0})
+	m(new Members{".",
+					0,
+					0,
+					0,
+					0,
+					0, {}, std::make_unique<Qt3DRender::QBuffer>(), std::make_unique<Mesh>()})
 {
 	QSettings settings;
-	setProblemDirectory(settings.value("ModFEM/QtHeat.0/problemDirectory", ".").toString());
+	setDirectory(settings.value("ModFEM/QtHeat.0/directory", ".").toString());
+
+	resetMeshData(); //temp
 }
 
-Controller::~Controller()
+Problem::~Problem()
 {
 	QSettings settings;
-	settings.setValue("ModFEM/QtHeat.0/problemDirectory", problemDirectory());
+	settings.setValue("ModFEM/QtHeat.0/directory", directory());
 }
 
-QString Controller::problemDirectory() const
+QString Problem::directory() const
 {
-	return m->problemDirectory;
+	return m->directory;
 }
 
-void Controller::setProblemDirectory(const QString & problemDirectory)
+void Problem::setDirectory(const QString & directory)
 {
-	if (m->problemDirectory != problemDirectory) {
-		m->problemDirectory = problemDirectory;
-		emit problemDirectoryChanged();
+	if (m->directory != directory) {
+		m->directory = directory;
+		emit directoryChanged();
 	}
 }
 
-int Controller::problemId() const
+int Problem::problemId() const
 {
 	return m->problemId;
 }
 
-int Controller::meshId() const
+int Problem::meshId() const
 {
 	return m->meshId;
 }
 
-int Controller::fieldId() const
+int Problem::fieldId() const
 {
 	return m->fieldId;
 }
 
-int Controller::solutionCount() const
+int Problem::solutionCount() const
 {
 	return m->solutionCount;
 }
 
-int Controller::equationCount() const
+int Problem::equationCount() const
 {
 	return m->equationCount;
 }
 
-void Controller::setProblemDirectoryFromURL(const QUrl & url)
+Mesh * Problem::mesh() const
 {
-	setProblemDirectory(url.toLocalFile());
+	return m->mesh.get();
 }
 
-void Controller::init()
+Qt3DRender::QBuffer * Problem::buffer() const
 {
-	QDir problemDir(problemDirectory());
+	return m->buffer.get();
+}
+
+QByteArray Problem::meshData() const
+{
+	return m->meshData;
+}
+
+void Problem::setDirectoryFromURL(const QUrl & url)
+{
+	setDirectory(url.toLocalFile());
+}
+
+void Problem::init()
+{
+	QDir problemDir(directory());
 	char * argv[] = {};
 	int argc = 0;
 	CUTEHMI_DEBUG("Initializing heat problem...");
@@ -204,10 +227,58 @@ void Controller::init()
 		setFieldId(pdr_ctrl_i_params(problemId(), 3));
 		setSolutionCount(pdr_ctrl_i_params(problemId(), 4));
 		setEquationCount(pdr_ctrl_i_params(problemId(), 5));
+
+		m->mesh->init(meshId());
 	}
 }
 
-void Controller::setProblemId(int problemId)
+void Problem::resetMeshData()
+{
+	//temp
+//	QDataStream stream(& m->meshData, QIODevice::WriteOnly);
+//	stream.setFloatingPointPrecision(QDataStream::SinglePrecision);
+
+//	stream << (qint32) - 5.0f << (qint32) - 5.0f << (qint32)0.0f;
+//	stream << (qint32)0.0f << (qint32) - 5.0f << (qint32)0.0f;
+//	stream << -5.0f << -5.0f << 0.0f;
+//	m->buffer->setData(tempData);
+	double point = -5.0;
+	m->meshData.append(reinterpret_cast<char *>(& point), sizeof (double));
+	point = -5.0;
+	m->meshData.append(reinterpret_cast<char *>(& point), sizeof (double));
+	point = -5.0;
+	m->meshData.append(reinterpret_cast<char *>(& point), sizeof (double));
+	point = 0.0;
+	m->meshData.append(reinterpret_cast<char *>(& point), sizeof (double));
+	point = 0.0;
+	m->meshData.append(reinterpret_cast<char *>(& point), sizeof (double));
+	point = -5.0;
+	m->meshData.append(reinterpret_cast<char *>(& point), sizeof (double));
+	point = 0.0;
+	m->meshData.append(reinterpret_cast<char *>(& point), sizeof (double));
+	emit meshDataChanged();
+	//endtemp
+
+	///@todo implement.
+}
+
+void Problem::resetBuffer()
+{
+	//temp
+	QByteArray tempData;
+	QDataStream stream(& tempData, QIODevice::WriteOnly);
+
+	stream << -5.0f << -5.0f << 0.0f;
+	stream << 0.0f << -5.0f << 0.0f;
+	stream << -5.0f << -5.0f << 0.0f;
+	m->buffer->setData(tempData);
+	emit bufferChanged();
+	//endtemp
+
+	///@todo implement.
+}
+
+void Problem::setProblemId(int problemId)
 {
 	if (m->problemId != problemId) {
 		m->problemId = problemId;
@@ -215,7 +286,7 @@ void Controller::setProblemId(int problemId)
 	}
 }
 
-void Controller::setMeshId(int meshId)
+void Problem::setMeshId(int meshId)
 {
 	if (m->meshId != meshId) {
 		m->meshId = meshId;
@@ -223,7 +294,7 @@ void Controller::setMeshId(int meshId)
 	}
 }
 
-void Controller::setFieldId(int fieldId)
+void Problem::setFieldId(int fieldId)
 {
 	if (m->fieldId != fieldId) {
 		m->fieldId = fieldId;
@@ -231,7 +302,7 @@ void Controller::setFieldId(int fieldId)
 	}
 }
 
-void Controller::setSolutionCount(int solutionCount)
+void Problem::setSolutionCount(int solutionCount)
 {
 	if (m->solutionCount != solutionCount) {
 		m->solutionCount = solutionCount;
@@ -239,7 +310,7 @@ void Controller::setSolutionCount(int solutionCount)
 	}
 }
 
-void Controller::setEquationCount(int equationCount)
+void Problem::setEquationCount(int equationCount)
 {
 	if (m->equationCount != equationCount) {
 		m->equationCount = equationCount;

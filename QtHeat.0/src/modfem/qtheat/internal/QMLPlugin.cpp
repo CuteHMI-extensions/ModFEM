@@ -1,6 +1,7 @@
 #include "QMLPlugin.hpp"
 
-#include <modfem/qtheat/Controller.hpp>
+#include <modfem/qtheat/Problem.hpp>
+#include <modfem/qtheat/Mesh.hpp>
 
 #include <QtQml>
 
@@ -12,7 +13,8 @@ void QMLPlugin::registerTypes(const char * uri)
 {
 	Q_ASSERT(uri == QLatin1String("ModFEM.QtHeat"));
 
-	qmlRegisterType<modfem::qtheat::Controller>(uri, MODFEM_QTHEAT_MAJOR, 0, "Controller");
+	qmlRegisterType<modfem::qtheat::Problem>(uri, MODFEM_QTHEAT_MAJOR, 0, "Problem");
+	qmlRegisterType<modfem::qtheat::Mesh>(uri, MODFEM_QTHEAT_MAJOR, 0, "Mesh");
 }
 
 }

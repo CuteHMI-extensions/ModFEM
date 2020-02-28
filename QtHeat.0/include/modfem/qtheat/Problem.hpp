@@ -1,21 +1,23 @@
-#ifndef H_EXTENSIONS_MODFEM_QTHEAT_0_INCLUDE_MODFEM_QTHEAT_CONTROLLER_HPP
-#define H_EXTENSIONS_MODFEM_QTHEAT_0_INCLUDE_MODFEM_QTHEAT_CONTROLLER_HPP
+#ifndef H_EXTENSIONS_MODFEM_QTHEAT_0_INCLUDE_MODFEM_QTHEAT_PROBLEM_HPP
+#define H_EXTENSIONS_MODFEM_QTHEAT_0_INCLUDE_MODFEM_QTHEAT_PROBLEM_HPP
 
 #include "internal/common.hpp"
+#include "Mesh.hpp"
 
 #include <QObject>
 #include <QUrl>
+#include <Qt3DRender/QBuffer>
 
 namespace modfem {
 namespace qtheat {
 
-class MODFEM_QTHEAT_API Controller:
+class MODFEM_QTHEAT_API Problem:
 	public QObject
 {
 		Q_OBJECT
 
 	public:
-		Q_PROPERTY(QString problemDirectory READ problemDirectory WRITE setProblemDirectory NOTIFY problemDirectoryChanged)
+		Q_PROPERTY(QString directory READ directory WRITE setDirectory NOTIFY directoryChanged)
 
 		Q_PROPERTY(int problemId READ problemId WRITE setProblemId NOTIFY problemIdChanged)
 
@@ -27,13 +29,19 @@ class MODFEM_QTHEAT_API Controller:
 
 		Q_PROPERTY(int equationCount READ equationCount WRITE setEquationCount NOTIFY equationCountChanged)
 
-		Controller(QObject * parent = nullptr);
+		Q_PROPERTY(Mesh * mesh READ mesh NOTIFY meshChanged)
 
-		~Controller() override;
+		Q_PROPERTY(Qt3DRender::QBuffer * buffer READ buffer NOTIFY bufferChanged)	/// @todo remove?
 
-		QString problemDirectory() const;
+		Q_PROPERTY(QByteArray meshData READ meshData NOTIFY meshDataChanged)
 
-		void setProblemDirectory(const QString & problemDirectory);
+		Problem(QObject * parent = nullptr);
+
+		~Problem() override;
+
+		QString directory() const;
+
+		void setDirectory(const QString & directory);
 
 		int problemId() const;
 
@@ -45,9 +53,19 @@ class MODFEM_QTHEAT_API Controller:
 
 		int equationCount() const;
 
-		Q_INVOKABLE void setProblemDirectoryFromURL(const QUrl & url);
+		Mesh * mesh() const;
+
+		Qt3DRender::QBuffer * buffer() const;	/// @todo remove?
+
+		QByteArray meshData() const;
+
+		Q_INVOKABLE void setDirectoryFromURL(const QUrl & url);
 
 		Q_INVOKABLE void init();
+
+		Q_INVOKABLE void resetMeshData();
+
+		Q_INVOKABLE void resetBuffer();	/// @todo remove?
 
 	protected slots:
 		void setProblemId(int problemId);
@@ -61,7 +79,7 @@ class MODFEM_QTHEAT_API Controller:
 		void setEquationCount(int equationCount);
 
 	signals:
-		void problemDirectoryChanged();
+		void directoryChanged();
 
 		void problemIdChanged();
 
@@ -73,14 +91,23 @@ class MODFEM_QTHEAT_API Controller:
 
 		void equationCountChanged();
 
+		void bufferChanged();	/// @todo remove?
+
+		void meshDataChanged();	/// @todo remove?
+
+		void meshChanged();
+
 	private:
 		struct Members {
-			QString problemDirectory;
+			QString directory;
 			int problemId;
 			int meshId;
 			int fieldId;
 			int solutionCount;
 			int equationCount;
+			QByteArray meshData;
+			std::unique_ptr<Qt3DRender::QBuffer> buffer;	/// @todo remove?
+			std::unique_ptr<Mesh> mesh;
 		};
 
 		cutehmi::MPtr<Members> m;

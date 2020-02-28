@@ -42,7 +42,10 @@ HIDE_IN_BODY_DOCS = YES
 FULL_PATH_NAMES = YES
 STRIP_FROM_INC_PATH = "include"
 TAGFILES += ../../../doc/tags/cppreference.com/cppreference-doxygen-web.tag.xml=https://en.cppreference.com/w
+TAGFILES += /home/michal/Qt/Docs/Qt-5.14.1/qt3dcore/qt3dcore.tags=http://doc.qt.io/qt-5
+TAGFILES += /home/michal/Qt/Docs/Qt-5.14.1/qt3drender/qt3drender.tags=http://doc.qt.io/qt-5
 TAGFILES += /home/michal/Qt/Docs/Qt-5.14.1/qtcore/qtcore.tags=http://doc.qt.io/qt-5
+TAGFILES += /home/michal/Qt/Docs/Qt-5.14.1/qtgui/qtgui.tags=http://doc.qt.io/qt-5
 TAGFILES += /home/michal/Qt/Docs/Qt-5.14.1/qtnetwork/qtnetwork.tags=http://doc.qt.io/qt-5
 TAGFILES += /home/michal/Qt/Docs/Qt-5.14.1/qtplugin_support/qtplugin_support.tags=http://doc.qt.io/qt-5
 TAGFILES += /home/michal/Qt/Docs/Qt-5.14.1/qtqml/qtqml.tags=http://doc.qt.io/qt-5
