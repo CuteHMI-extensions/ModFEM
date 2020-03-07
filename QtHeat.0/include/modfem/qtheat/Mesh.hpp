@@ -2,6 +2,7 @@
 #define H_EXTENSIONS_MODFEM_QTHEAT_0_INCLUDE_MODFEM_QTHEAT_MESH_HPP
 
 #include "internal/common.hpp"
+#include "FaceData.hpp"
 
 #include <QObject>
 
@@ -14,23 +15,40 @@ class MODFEM_QTHEAT_API Mesh:
 		Q_OBJECT
 
 	public:
+		/// @todo switch beteen active/inactive.
+//		Q_PROPERTY(bool active READ active WRITE setActive NOTIFY activeChanged)
+
 		Q_PROPERTY(int nodeCount READ nodeCount NOTIFY nodeCountChanged)
 
-		Q_PROPERTY(QByteArray nodeData READ nodeData NOTIFY nodeDataChanged)
+		Q_PROPERTY(QByteArray nodeCoords READ nodeCoords NOTIFY nodeCoordsChanged)
+
+		Q_PROPERTY(FaceData * faceData READ faceData NOTIFY faceDataChanged)
+
+//		Q_PROPERTY(QVariantMap nodes READ nodes NOTIFY nodesChanged)
+
+		Q_PROPERTY(QVariantMap triangles READ triangles NOTIFY trianglesChanged)
 
 		explicit Mesh(QObject * parent = nullptr);
 
 		int nodeCount() const;
 
-		QByteArray nodeData() const;
+		QByteArray nodeCoords() const;
+
+		FaceData * faceData() const;
+
+		QVariantMap triangles() const;
 
 	public slots:
 		void init(int meshId);
 
 	signals:
-		void nodeDataChanged();
+		void nodeCoordsChanged();
 
 		void nodeCountChanged();
+
+		void faceDataChanged();
+
+		void trianglesChanged();
 
 	private slots:
 		void setNodeData(int meshId);
@@ -40,7 +58,9 @@ class MODFEM_QTHEAT_API Mesh:
 	private:
 		struct Members {
 			int nodeCount;
-			QByteArray nodeData;
+			QByteArray nodeCoords;	///@todo rename to activeNodeVertices and add inactiveNodeVertices array.
+			FaceData * faceData;
+			QVariantMap triangles;
 		};
 
 		cutehmi::MPtr<Members> m;

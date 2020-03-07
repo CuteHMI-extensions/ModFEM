@@ -31,10 +31,6 @@ class MODFEM_QTHEAT_API Problem:
 
 		Q_PROPERTY(Mesh * mesh READ mesh NOTIFY meshChanged)
 
-		Q_PROPERTY(Qt3DRender::QBuffer * buffer READ buffer NOTIFY bufferChanged)	/// @todo remove?
-
-		Q_PROPERTY(QByteArray meshData READ meshData NOTIFY meshDataChanged)
-
 		Problem(QObject * parent = nullptr);
 
 		~Problem() override;
@@ -55,17 +51,9 @@ class MODFEM_QTHEAT_API Problem:
 
 		Mesh * mesh() const;
 
-		Qt3DRender::QBuffer * buffer() const;	/// @todo remove?
-
-		QByteArray meshData() const;
-
 		Q_INVOKABLE void setDirectoryFromURL(const QUrl & url);
 
 		Q_INVOKABLE void init();
-
-		Q_INVOKABLE void resetMeshData();
-
-		Q_INVOKABLE void resetBuffer();	/// @todo remove?
 
 	protected slots:
 		void setProblemId(int problemId);
@@ -91,10 +79,6 @@ class MODFEM_QTHEAT_API Problem:
 
 		void equationCountChanged();
 
-		void bufferChanged();	/// @todo remove?
-
-		void meshDataChanged();	/// @todo remove?
-
 		void meshChanged();
 
 	private:
@@ -105,9 +89,7 @@ class MODFEM_QTHEAT_API Problem:
 			int fieldId;
 			int solutionCount;
 			int equationCount;
-			QByteArray meshData;
-			std::unique_ptr<Qt3DRender::QBuffer> buffer;	/// @todo remove?
-			std::unique_ptr<Mesh> mesh;
+			Mesh * mesh;
 		};
 
 		cutehmi::MPtr<Members> m;

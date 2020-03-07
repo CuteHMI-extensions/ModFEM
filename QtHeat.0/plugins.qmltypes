@@ -9,12 +9,32 @@ import QtQuick.tooling 1.2
 Module {
     dependencies: []
     Component {
+        name: "modfem::qtheat::FaceData"
+        prototype: "QObject"
+        exports: ["ModFEM.QtHeat/FaceData 0.0"]
+        isCreatable: false
+        exportMetaObjectRevisions: [0]
+        Property { name: "triangleCount"; type: "int"; isReadonly: true }
+        Property { name: "triangleIndices"; type: "QByteArray"; isReadonly: true }
+        Property { name: "triangleCoords"; type: "QByteArray"; isReadonly: true }
+        Property { name: "triangleNormals"; type: "QByteArray"; isReadonly: true }
+        Property { name: "quadCount"; type: "int"; isReadonly: true }
+        Property { name: "quadIndices"; type: "QByteArray"; isReadonly: true }
+        Property { name: "quadCoords"; type: "QByteArray"; isReadonly: true }
+        Method {
+            name: "init"
+            Parameter { name: "meshId"; type: "int" }
+        }
+    }
+    Component {
         name: "modfem::qtheat::Mesh"
         prototype: "QObject"
         exports: ["ModFEM.QtHeat/Mesh 0.0"]
         exportMetaObjectRevisions: [0]
         Property { name: "nodeCount"; type: "int"; isReadonly: true }
-        Property { name: "nodeData"; type: "QByteArray"; isReadonly: true }
+        Property { name: "nodeCoords"; type: "QByteArray"; isReadonly: true }
+        Property { name: "faceData"; type: "FaceData"; isReadonly: true; isPointer: true }
+        Property { name: "triangles"; type: "QVariantMap"; isReadonly: true }
         Method {
             name: "init"
             Parameter { name: "meshId"; type: "int" }
@@ -32,14 +52,10 @@ Module {
         Property { name: "solutionCount"; type: "int" }
         Property { name: "equationCount"; type: "int" }
         Property { name: "mesh"; type: "Mesh"; isReadonly: true; isPointer: true }
-        Property { name: "buffer"; type: "Qt3DRender::QBuffer"; isReadonly: true; isPointer: true }
-        Property { name: "meshData"; type: "QByteArray"; isReadonly: true }
         Method {
             name: "setDirectoryFromURL"
             Parameter { name: "url"; type: "QUrl" }
         }
         Method { name: "init" }
-        Method { name: "resetMeshData" }
-        Method { name: "resetBuffer" }
     }
 }

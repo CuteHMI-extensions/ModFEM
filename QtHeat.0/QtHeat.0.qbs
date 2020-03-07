@@ -17,12 +17,16 @@ Project {
 		description: "Heat user interface."
 
 		files: [
+         "include/modfem/qtheat/ElementData.hpp",
+         "include/modfem/qtheat/FaceData.hpp",
          "include/modfem/qtheat/Mesh.hpp",
          "include/modfem/qtheat/Problem.hpp",
          "include/modfem/qtheat/internal/common.hpp",
          "include/modfem/qtheat/internal/platform.hpp",
          "include/modfem/qtheat/logging.hpp",
          "include/modfem/qtheat/metadata.hpp",
+         "src/modfem/qtheat/ElementData.cpp",
+         "src/modfem/qtheat/FaceData.cpp",
          "src/modfem/qtheat/Mesh.cpp",
          "src/modfem/qtheat/Problem.cpp",
          "src/modfem/qtheat/internal/QMLPlugin.cpp",

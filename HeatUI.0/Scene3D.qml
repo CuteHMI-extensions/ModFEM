@@ -16,47 +16,47 @@ Scene3D {
 
 	//	property QtHeat.Controller controller
 
-	Entity {
-		id: sceneRoot
+//	Entity {
+//		id: sceneRoot
 
-		Camera {
-			id: camera1
-			projectionType: CameraLens.PerspectiveProjection
-			fieldOfView: 45
-			nearPlane : 0.1
-			farPlane : 1000.0
-			position: Qt.vector3d( 0.0, 0.0, 40.0 )
-			upVector: Qt.vector3d( 0.0, 1.0, 0.0 )
-			viewCenter: Qt.vector3d( 0.0, 0.0, 0.0 )
-		}
+//		Camera {
+//			id: camera1
+//			projectionType: CameraLens.PerspectiveProjection
+//			fieldOfView: 45
+//			nearPlane : 0.1
+//			farPlane : 1000.0
+//			position: Qt.vector3d( 0.0, 0.0, 40.0 )
+//			upVector: Qt.vector3d( 0.0, 1.0, 0.0 )
+//			viewCenter: Qt.vector3d( 0.0, 0.0, 0.0 )
+//		}
 
-		FirstPersonCameraController {
-			camera: camera1
-			linearSpeed: 100
-		}
+//		FirstPersonCameraController {
+//			camera: camera1
+//			linearSpeed: 100
+//		}
 
-		components: [
-			RenderSettings {
-				activeFrameGraph: RenderSurfaceSelector {
-					ClearBuffers {
-						buffers : ClearBuffers.ColorDepthBuffer
+//		components: [
+//			RenderSettings {
+//				activeFrameGraph: RenderSurfaceSelector {
+//					ClearBuffers {
+//						buffers : ClearBuffers.ColorDepthBuffer
 
-						CameraSelector {
-							camera: camera1
+//						CameraSelector {
+//							camera: camera1
 
-							RenderStateSet {
-								renderStates: [
-									LineWidth { value: 3 },
-									PointSize { value: 10; sizeMode: PointSize.Fixed }
-								]
-							}
-						}
-					}
-				}
-			},
+//							RenderStateSet {
+//								renderStates: [
+//									LineWidth { value: 3 },
+//									PointSize { value: 10; sizeMode: PointSize.Fixed }
+//								]
+//							}
+//						}
+//					}
+//				}
+//			},
 
-			InputSettings { }
-		]
+//			InputSettings { }
+//		]
 
 
 		//				components: [
@@ -102,8 +102,8 @@ Scene3D {
 //		]
 
 
-		MeshEntity {
-			//			Controller: controller.buffer
-		}
-	}
+//		MeshEntity {
+//			//			Controller: controller.buffer
+//		}
+//	}
 }

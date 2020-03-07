@@ -96,12 +96,11 @@ Problem::Problem(QObject * parent):
 					0,
 					0,
 					0,
-					0, {}, std::make_unique<Qt3DRender::QBuffer>(), std::make_unique<Mesh>()})
+					0,
+					new Mesh(this)})
 {
 	QSettings settings;
 	setDirectory(settings.value("ModFEM/QtHeat.0/directory", ".").toString());
-
-	resetMeshData(); //temp
 }
 
 Problem::~Problem()
@@ -150,17 +149,7 @@ int Problem::equationCount() const
 
 Mesh * Problem::mesh() const
 {
-	return m->mesh.get();
-}
-
-Qt3DRender::QBuffer * Problem::buffer() const
-{
-	return m->buffer.get();
-}
-
-QByteArray Problem::meshData() const
-{
-	return m->meshData;
+	return m->mesh;
 }
 
 void Problem::setDirectoryFromURL(const QUrl & url)
@@ -230,52 +219,6 @@ void Problem::init()
 
 		m->mesh->init(meshId());
 	}
-}
-
-void Problem::resetMeshData()
-{
-	//temp
-//	QDataStream stream(& m->meshData, QIODevice::WriteOnly);
-//	stream.setFloatingPointPrecision(QDataStream::SinglePrecision);
-
-//	stream << (qint32) - 5.0f << (qint32) - 5.0f << (qint32)0.0f;
-//	stream << (qint32)0.0f << (qint32) - 5.0f << (qint32)0.0f;
-//	stream << -5.0f << -5.0f << 0.0f;
-//	m->buffer->setData(tempData);
-	double point = -5.0;
-	m->meshData.append(reinterpret_cast<char *>(& point), sizeof (double));
-	point = -5.0;
-	m->meshData.append(reinterpret_cast<char *>(& point), sizeof (double));
-	point = -5.0;
-	m->meshData.append(reinterpret_cast<char *>(& point), sizeof (double));
-	point = 0.0;
-	m->meshData.append(reinterpret_cast<char *>(& point), sizeof (double));
-	point = 0.0;
-	m->meshData.append(reinterpret_cast<char *>(& point), sizeof (double));
-	point = -5.0;
-	m->meshData.append(reinterpret_cast<char *>(& point), sizeof (double));
-	point = 0.0;
-	m->meshData.append(reinterpret_cast<char *>(& point), sizeof (double));
-	emit meshDataChanged();
-	//endtemp
-
-	///@todo implement.
-}
-
-void Problem::resetBuffer()
-{
-	//temp
-	QByteArray tempData;
-	QDataStream stream(& tempData, QIODevice::WriteOnly);
-
-	stream << -5.0f << -5.0f << 0.0f;
-	stream << 0.0f << -5.0f << 0.0f;
-	stream << -5.0f << -5.0f << 0.0f;
-	m->buffer->setData(tempData);
-	emit bufferChanged();
-	//endtemp
-
-	///@todo implement.
 }
 
 void Problem::setProblemId(int problemId)

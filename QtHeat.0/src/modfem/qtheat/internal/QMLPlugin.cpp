@@ -2,6 +2,7 @@
 
 #include <modfem/qtheat/Problem.hpp>
 #include <modfem/qtheat/Mesh.hpp>
+#include <modfem/qtheat/FaceData.hpp>
 
 #include <QtQml>
 
@@ -15,6 +16,7 @@ void QMLPlugin::registerTypes(const char * uri)
 
 	qmlRegisterType<modfem::qtheat::Problem>(uri, MODFEM_QTHEAT_MAJOR, 0, "Problem");
 	qmlRegisterType<modfem::qtheat::Mesh>(uri, MODFEM_QTHEAT_MAJOR, 0, "Mesh");
+	qmlRegisterUncreatableType<modfem::qtheat::FaceData>(uri, MODFEM_QTHEAT_MAJOR, 0, "FaceData", "Class 'modfem::qtheat::FaceData' can not be instantiated from QML");
 }
 
 }

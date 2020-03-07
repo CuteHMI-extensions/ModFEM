@@ -2,6 +2,11 @@ import QtQuick 2.0
 import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.3
 
+import Qt3D.Core 2.5
+import Qt3D.Render 2.14
+import Qt3D.Input 2.5
+import Qt3D.Extras 2.5
+
 import Qt.labs.platform 1.1
 import Qt.labs.settings 1.1
 
@@ -18,28 +23,77 @@ Item {
 	RowLayout {
 		anchors.fill: parent
 
-		Column {
+		ColumnLayout {
+			id: leftLayout
+
 			Layout.alignment: Qt.AlignTop
 
-			Label {
-				text: qsTr("Problem id: ") + heatProblem.problemId
+			Layout.fillWidth: true
+
+			ProblemInfo {
+				Layout.minimumWidth: Math.max(leftLayout.width, Layout.preferredWidth)
+
+				problem: heatProblem
 			}
 
-			Label {
-				text: qsTr("Mesh id: ") + heatProblem.meshId
+			MeshInfo {
+				Layout.minimumWidth: Math.max(leftLayout.width, Layout.preferredWidth)
+
+				problem: heatProblem
 			}
 
-			Label {
-				text: qsTr("Field id: ") + heatProblem.fieldId
+			GroupBox {
+				title: qsTr("Visibility")
+
+				Layout.minimumWidth: Math.max(leftLayout.width, Layout.preferredWidth)
+
+				Column {
+					CheckBox {
+						id: nodesCheckbox
+
+						checked: true
+						text: qsTr("Nodes")
+					}
+
+					CheckBox {
+						id: facesCheckbox
+
+						checked: true
+						text: qsTr("Faces")
+					}
+				}
 			}
 
-			Label {
-				text: qsTr("Solution count: ") + heatProblem.solutionCount
+			GridLayout {
+				columns: 2
+
+				Label {
+					text: qsTr("Point size:")
+				}
+
+				Slider {
+					from: 1
+					to: 20
+					stepSize: 1
+					value: renderSettings.pointSize
+
+					onValueChanged: renderSettings.pointSize = value
+				}
+
+				Label {
+					text: qsTr("Line width:")
+				}
+
+				Slider {
+					from: 1
+					to: 20
+					stepSize: 1
+					value: renderSettings.lineWidth
+
+					onValueChanged: renderSettings.lineWidth = value
+				}
 			}
 
-			Label {
-				text: qsTr("Equation count: ") + heatProblem.equationCount
-			}
 		}
 
 		ColumnLayout {
@@ -73,15 +127,9 @@ Item {
 				spacing: 5
 
 				Button {
-					text: "Init"
+					text: qsTr("Init")
 
 					onClicked: heatProblem.init()
-				}
-
-				Button {
-					text: "Reset buffer"
-
-					onClicked: heatProblem.resetBuffer()
 				}
 			}
 
@@ -95,7 +143,100 @@ Item {
 
 					anchors.fill: parent
 
-//					controller: heat
+					aspects: ["input", "logic"]
+
+					cameraAspectRatioMode: Scene3D.AutomaticAspectRatio
+
+					Entity {
+						id: sceneRoot
+
+						components: [renderSettings, inputSettings]
+
+						RenderSettings {
+							id: renderSettings
+
+							property real pointSize: 10
+
+							property real lineWidth: 3
+
+//							activeFrameGraph: ForwardRenderer {
+//								clearColor: "transparent"
+//								camera: camera1
+//							}
+
+							activeFrameGraph: RenderSurfaceSelector {
+								ClearBuffers {
+									buffers : ClearBuffers.ColorDepthBuffer
+
+									CameraSelector {
+										camera: camera1
+
+										RenderStateSet {
+											renderStates: [
+												CullFace { mode: CullFace.Back },
+												LineWidth { value: renderSettings.lineWidth },
+												PointSize { value: renderSettings.pointSize; sizeMode: PointSize.Fixed }
+											]
+										}
+									}
+								}
+							}
+						}
+
+						InputSettings {
+							id: inputSettings
+						}
+
+						MouseDevice {
+							id: mouseDevice
+						}
+
+						MouseHandler {
+							sourceDevice: mouseDevice
+
+							onPressed: scene3d.focus = true
+						}
+
+						Camera {
+							id: camera1
+							projectionType: CameraLens.PerspectiveProjection
+							fieldOfView: 45
+							nearPlane : 0.1
+							farPlane : 1000.0
+							position: Qt.vector3d( 0.0, 0.0, 40.0 )
+							upVector: Qt.vector3d( 0.0, 1.0, 0.0 )
+							viewCenter: Qt.vector3d( 0.0, 0.0, 0.0 )
+						}
+
+						FirstPersonCameraController {
+							camera: camera1
+							linearSpeed: 100
+						}
+
+						MeshEntity {
+							nodesEnabled: nodesCheckbox.checked
+						}
+					}
+				}
+
+				Row {
+					x: parent.width - width - 10
+					y: 10
+					spacing: 10
+
+					/// @todo turn rectangle to icon with arrow keys symbol.
+					Rectangle {
+						opacity: scene3d.focus
+
+						width: 10
+						height: 10
+
+						color: "transparent"
+						border.color: "white"
+						border.width: 1
+
+						Behavior on opacity { NumberAnimation {} }
+					}
 				}
 			}
 		}

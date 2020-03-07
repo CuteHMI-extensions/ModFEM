@@ -1,12 +1,16 @@
 #include "../../../include/modfem/qtheat/Mesh.hpp"
 
+#include <modfem/mmh_intf.h>
+
 namespace modfem {
 namespace qtheat {
 
 Mesh::Mesh(QObject * parent):
 	QObject(parent),
 	m(new Members{
-	0, {}})
+	0,
+	{},
+	new FaceData(this)})
 {
 }
 
@@ -15,43 +19,42 @@ int Mesh::nodeCount() const
 	return m->nodeCount;
 }
 
-QByteArray Mesh::nodeData() const
+QByteArray Mesh::nodeCoords() const
 {
-	return m->nodeData;
+	return m->nodeCoords;
+}
+
+FaceData * Mesh::faceData() const
+{
+	return m->faceData;
+}
+
+QVariantMap Mesh::triangles() const
+{
+	return m->triangles;
 }
 
 void Mesh::init(int meshId)
 {
 	setNodeData(meshId);
+	m->faceData->init(meshId);
 }
 
 void Mesh::setNodeData(int meshId)
 {
-	//temp
-//	QDataStream stream(& m->meshData, QIODevice::WriteOnly);
-//	stream.setFloatingPointPrecision(QDataStream::SinglePrecision);
+	int activeNodes = mmr_get_nr_node(meshId);
+	m->nodeCoords.clear();
+	m->nodeCoords.reserve(sizeof(double) * activeNodes * 3);
 
-//	stream << (qint32) - 5.0f << (qint32) - 5.0f << (qint32)0.0f;
-//	stream << (qint32)0.0f << (qint32) - 5.0f << (qint32)0.0f;
-//	stream << -5.0f << -5.0f << 0.0f;
-//	m->buffer->setData(tempData);
-	double point = -5.0;
-	m->nodeData.append(reinterpret_cast<char *>(& point), sizeof (double));
-	point = -5.0;
-	m->nodeData.append(reinterpret_cast<char *>(& point), sizeof (double));
-	point = -5.0;
-	m->nodeData.append(reinterpret_cast<char *>(& point), sizeof (double));
-	point = 0.0;
-	m->nodeData.append(reinterpret_cast<char *>(& point), sizeof (double));
-	point = 0.0;
-	m->nodeData.append(reinterpret_cast<char *>(& point), sizeof (double));
-	point = -5.0;
-	m->nodeData.append(reinterpret_cast<char *>(& point), sizeof (double));
-	point = 0.0;
-	m->nodeData.append(reinterpret_cast<char *>(& point), sizeof (double));
-	emit nodeDataChanged();
-	setNodeCount(7);
-	//endtemp
+	double coords[3];
+	for (int i = 0; i <= mmr_get_max_node_id(meshId); i++) {
+		if (mmr_node_status(meshId, i) == MMC_ACTIVE) {
+			mmr_node_coor(meshId, i, coords);
+			m->nodeCoords.append(reinterpret_cast<char *>(coords), sizeof(double) * 3);
+		}
+	}
+	setNodeCount(activeNodes);
+	emit nodeCoordsChanged();
 }
 
 void Mesh::setNodeCount(int count)

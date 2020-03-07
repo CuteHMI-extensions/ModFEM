@@ -21,8 +21,10 @@ Project {
 		files: [
          "Main.qml",
          "MeshEntity.qml",
+         "MeshInfo.qml",
+         "ProblemInfo.qml",
          "Scene3D.qml",
-	 ]
+     ]
 
 		Depends { name: "CuteHMI.2" }
 
