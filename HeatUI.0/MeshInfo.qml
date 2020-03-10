@@ -9,17 +9,33 @@ GroupBox {
 
 	property Problem problem
 
-	Column {
+	ColumnLayout {
+//		Label {
+//			text: qsTr("Nodes: ") + problem.mesh.nodeCount
+//		}
+
+//		Label {
+//			text: qsTr("Triangle faces: ") + problem.mesh.faceData.triangleCount
+//		}
+
+//		Label {
+//			text: qsTr("Quad faces: ") + problem.mesh.faceData.quadCount
+//		}
+
 		Label {
-			text: qsTr("Nodes: ") + problem.mesh.nodeCount
+			text: qsTr("Nodes: ") + problem.mesh.nodes.count
 		}
 
 		Label {
-			text: qsTr("Triangle faces: ") + problem.mesh.faceData.triangleCount
+			text: qsTr("Triangles: ") + problem.mesh.triangles.count
 		}
 
 		Label {
-			text: qsTr("Quad faces: ") + problem.mesh.faceData.quadCount
+			text: qsTr("Quads: ") + problem.mesh.quads.count
+		}
+
+		Label {
+			text: qsTr("Lines: ") + problem.mesh.lines.count
 		}
 	}
 }

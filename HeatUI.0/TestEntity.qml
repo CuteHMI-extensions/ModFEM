@@ -10,8 +10,25 @@ Entity {
 
 	property bool facesEnabled: true
 
+	property real rotationX: 0
+
+	property real rotationY: 0
+
+	property real rotationZ: 0
+
+	property real scale: 1
+
 	PhongMaterial {
-		id: redMaterial
+		id: lineMaterial
+
+		diffuse: Qt.rgba(0.5, 0.2, 0.1, 1.0)
+		ambient: Qt.rgba(0.6, 0.2, 0.2, 1.0)
+		specular: Qt.rgba(0.8, 0.2, 0.2, 1.0)
+		shininess: 1.0
+	}
+
+	PhongMaterial {
+		id: faceMaterial
 
 		//		ambient: "red"
 		diffuse: Qt.rgba(0.1, 0.5, 0.1, 1.0)
@@ -139,6 +156,40 @@ Entity {
 		}
 	}
 
+	GeometryRenderer {
+		id: trianglesRenderer
+
+		primitiveType: GeometryRenderer.Triangles
+		instanceCount: 1
+		geometry: Geometry {
+			Attribute {
+				name: defaultNormalAttributeName
+				attributeType: Attribute.VertexAttribute
+				vertexBaseType: Attribute.Double
+				vertexSize: 3
+				byteOffset: 0
+				byteStride: vertexSize * Float64Array.BYTES_PER_ELEMENT
+				count: heatProblem.mesh.triangles.count * 3			// 3 vertices per triangle.
+				buffer: Buffer {
+					data: heatProblem.mesh.triangles.normals
+				}
+			}
+
+			Attribute {
+				name: defaultPositionAttributeName
+				attributeType: Attribute.VertexAttribute
+				vertexBaseType: Attribute.Double
+				vertexSize: 3
+				byteOffset: 0
+				byteStride: vertexSize * Float64Array.BYTES_PER_ELEMENT
+				count: heatProblem.mesh.triangles.count * 3		// 3 vertices per triangle.
+				buffer: Buffer {
+					data: heatProblem.mesh.triangles.coords
+				}
+			}
+		}
+	}
+
 	TorusMesh {
 		id: torusMesh
 
@@ -150,16 +201,25 @@ Entity {
 		//		primitiveType: GeometryRenderer.LineLoop
 	}
 
-		Transform {
-			id: torusTransform
-			scale3D: Qt.vector3d(1.5, 1, 0.5)
-			rotation: fromAxisAndAngle(Qt.vector3d(1, 0, 0), 45)
-			translation: Qt.vector3d(10, 2, -10)
-		}
+	Transform {
+		id: torusTransform
+		scale3D: Qt.vector3d(1.5, 1, 0.5)
+		rotation: fromAxisAndAngle(Qt.vector3d(1, 0, 0), 45)
+		translation: Qt.vector3d(10, 2, -10)
+	}
 
-//		components: [torusMesh, redMaterial, torusTransform]
-		components: [triangleFaceRenderer, redMaterial]
-//		components: [nodeRenderer, redMaterial]
-	//	components: [nodeRenderer, triangleFaceRenderer, redMaterial]
-//		components: [testRenderer, redMaterial]
+	Transform {
+		id: trianglesTransforms
+		scale: root.scale
+		rotationX: root.rotationX
+		rotationY: root.rotationY
+		rotationZ: root.rotationZ
+	}
+
+	//		components: [torusMesh, faceMaterial, torusTransform]
+	//		components: [triangleFaceRenderer, faceMaterial]
+	components: [trianglesRenderer, faceMaterial, trianglesTransforms]
+	//		components: [nodeRenderer, faceMaterial]
+	//	components: [nodeRenderer, triangleFaceRenderer, faceMaterial]
+	//		components: [testRenderer, faceMaterial]
 }

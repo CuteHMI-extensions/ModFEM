@@ -23,7 +23,8 @@ Project {
          "MeshEntity.qml",
          "MeshInfo.qml",
          "ProblemInfo.qml",
-         "Scene3D.qml",
+		 "Scene3D.qml",
+         "TestEntity.qml",
      ]
 
 		Depends { name: "CuteHMI.2" }

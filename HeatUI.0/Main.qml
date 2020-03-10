@@ -5,7 +5,7 @@ import QtQuick.Layouts 1.3
 import Qt3D.Core 2.5
 import Qt3D.Render 2.14
 import Qt3D.Input 2.5
-import Qt3D.Extras 2.5
+import Qt3D.Extras 2.14
 
 import Qt.labs.platform 1.1
 import Qt.labs.settings 1.1
@@ -51,8 +51,15 @@ Item {
 					CheckBox {
 						id: nodesCheckbox
 
-						checked: true
+						checked: false
 						text: qsTr("Nodes")
+					}
+
+					CheckBox {
+						id: linesCheckbox
+
+						checked: true
+						text: qsTr("Lines")
 					}
 
 					CheckBox {
@@ -159,12 +166,12 @@ Item {
 
 							property real lineWidth: 3
 
-//							activeFrameGraph: ForwardRenderer {
+//							ForwardRenderer {
 //								clearColor: "transparent"
 //								camera: camera1
 //							}
 
-							activeFrameGraph: RenderSurfaceSelector {
+							RenderSurfaceSelector {
 								ClearBuffers {
 									buffers : ClearBuffers.ColorDepthBuffer
 
@@ -173,7 +180,8 @@ Item {
 
 										RenderStateSet {
 											renderStates: [
-												CullFace { mode: CullFace.Back },
+												DepthTest { depthFunction: DepthTest.Less },
+												CullFace { mode: CullFace.NoCulling },
 												LineWidth { value: renderSettings.lineWidth },
 												PointSize { value: renderSettings.pointSize; sizeMode: PointSize.Fixed }
 											]
@@ -213,8 +221,24 @@ Item {
 							linearSpeed: 100
 						}
 
+//						TestEntity {
+//							nodesEnabled: nodesCheckbox.checked
+
+//							rotationX: rotationXSlider.value
+//							rotationY: rotationYSlider.value
+//							rotationZ: rotationZSlider.value
+//							scale: scaleSlider.value
+//						}
+
 						MeshEntity {
+							rotationX: rotationXSlider.value
+							rotationY: rotationYSlider.value
+							rotationZ: rotationZSlider.value
+							scale: scaleSlider.value
+
 							nodesEnabled: nodesCheckbox.checked
+							linesEnabled: linesCheckbox.checked
+							facesEnabled: facesCheckbox.checked
 						}
 					}
 				}
@@ -236,6 +260,36 @@ Item {
 						border.width: 1
 
 						Behavior on opacity { NumberAnimation {} }
+					}
+				}
+
+				Column {
+					Slider {
+						id: rotationXSlider
+
+						from: -180
+						to: 180
+					}
+
+					Slider {
+						id: rotationYSlider
+
+						from: -180
+						to: 180
+					}
+
+					Slider {
+						id: rotationZSlider
+
+						from: -180
+						to: 180
+					}
+
+					Slider {
+						id: scaleSlider
+						from: 0.1
+						to: 2
+						value: 1
 					}
 				}
 			}

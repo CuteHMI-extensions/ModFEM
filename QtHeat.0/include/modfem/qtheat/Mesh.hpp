@@ -24,9 +24,13 @@ class MODFEM_QTHEAT_API Mesh:
 
 		Q_PROPERTY(FaceData * faceData READ faceData NOTIFY faceDataChanged)
 
-//		Q_PROPERTY(QVariantMap nodes READ nodes NOTIFY nodesChanged)
+		Q_PROPERTY(QVariantMap nodes READ nodes NOTIFY nodesChanged)
 
 		Q_PROPERTY(QVariantMap triangles READ triangles NOTIFY trianglesChanged)
+
+		Q_PROPERTY(QVariantMap quads READ quads NOTIFY quadsChanged)
+
+		Q_PROPERTY(QVariantMap lines READ lines NOTIFY linesChanged)
 
 		explicit Mesh(QObject * parent = nullptr);
 
@@ -36,7 +40,13 @@ class MODFEM_QTHEAT_API Mesh:
 
 		FaceData * faceData() const;
 
+		QVariantMap nodes() const;
+
 		QVariantMap triangles() const;
+
+		QVariantMap quads() const;
+
+		QVariantMap lines() const;
 
 	public slots:
 		void init(int meshId);
@@ -48,19 +58,32 @@ class MODFEM_QTHEAT_API Mesh:
 
 		void faceDataChanged();
 
+		void nodesChanged();
+
 		void trianglesChanged();
+
+		void quadsChanged();
+
+		void linesChanged();
 
 	private slots:
 		void setNodeData(int meshId);
 
 		void setNodeCount(int count);
 
+		void update(int meshId);
+
+		void count(int meshId);
+
 	private:
 		struct Members {
 			int nodeCount;
 			QByteArray nodeCoords;	///@todo rename to activeNodeVertices and add inactiveNodeVertices array.
 			FaceData * faceData;
+			QVariantMap nodes;
 			QVariantMap triangles;
+			QVariantMap quads;
+			QVariantMap lines;
 		};
 
 		cutehmi::MPtr<Members> m;

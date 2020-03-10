@@ -1,0 +1,23 @@
+Problem:
+
+Function mmr_fa_node_coor() in 'mm_t4_prism' module seems to not return correct face coordinates.
+
+Investigation:
+
+The problem stems from incorrect array lookup in mmr_fa_node_coor() function.
+
+			Node_coor[3 * c  ] = m.vertices_[Nodes[c]].coords_[0];
+			Node_coor[3 * c + 1] = m.vertices_[Nodes[c]].coords_[1];
+			Node_coor[3 * c + 2] = m.vertices_[Nodes[c]].coords_[2];
+
+Should be:
+			Node_coor[3 * c  ] = m.vertices_[Nodes[c + 1]].coords_[0];
+			Node_coor[3 * c + 1] = m.vertices_[Nodes[c + 1]].coords_[1];
+			Node_coor[3 * c + 2] = m.vertices_[Nodes[c + 1]].coords_[2];
+
+Workaround:
+
+Workaround is to call mmr_node_coor() on each indexed node of a face.
+
+Snippet:
+
