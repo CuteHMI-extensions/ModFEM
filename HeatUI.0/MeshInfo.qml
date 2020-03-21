@@ -5,7 +5,7 @@ import QtQuick.Layouts 1.3
 import ModFEM.Heat 0.0
 
 ColumnLayout {
-	property Problem problem
+	property ElementData elementData
 
 
 	GroupBox {
@@ -15,9 +15,44 @@ ColumnLayout {
 
 		ColumnLayout {
 			Label {
-				text: qsTr("Elements: ") + problem.elements.count.elements
+				text: qsTr("Elements: ") + elementData.count.elements
 			}
 
+			Label {
+				text: qsTr("Tetrahedrons: ") + elementData.count.tetrahedrons
+			}
+
+			Label {
+				text: qsTr("Prisms: ") + elementData.count.prisms
+			}
+
+			Label {
+				text: qsTr("Bricks: ") + elementData.count.bricks
+			}
+
+			Label {
+				text: qsTr("Triangles: ") + elementData.count.triangles
+			}
+
+			Label {
+				text: qsTr("Quads: ") + elementData.count.quads
+			}
+
+			Label {
+				text: qsTr("Faces: ") + elementData.count.faces
+			}
+
+			Label {
+				text: qsTr("Edges: ") + elementData.count.edges
+			}
+
+			Label {
+				text: qsTr("Lines: ") + elementData.count.lines
+			}
+
+			Label {
+				text: qsTr("Nodes: ") + elementData.count.nodes
+			}
 		}
 	}
 
@@ -28,19 +63,23 @@ ColumnLayout {
 
 		ColumnLayout {
 			Label {
-				text: qsTr("Nodes: ") + problem.elements.nodes.count
+				text: qsTr("Triangles: ") + elementData.triangles.count
 			}
 
 			Label {
-				text: qsTr("Triangles: ") + problem.elements.triangles.count
+				text: qsTr("Quads: ") + elementData.quads.count
 			}
 
 			Label {
-				text: qsTr("Quads: ") + problem.elements.quads.count
+				text: qsTr("Quad triangles: ") + elementData.quads.triangleCount
 			}
 
 			Label {
-				text: qsTr("Lines: ") + problem.elements.lines.count
+				text: qsTr("Lines: ") + elementData.lines.count
+			}
+
+			Label {
+				text: qsTr("Nodes: ") + elementData.nodes.count
 			}
 		}
 	}

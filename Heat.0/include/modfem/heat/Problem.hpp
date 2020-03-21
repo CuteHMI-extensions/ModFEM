@@ -29,9 +29,7 @@ class MODFEM_HEAT_API Problem:
 
 		Q_PROPERTY(int equationCount READ equationCount WRITE setEquationCount NOTIFY equationCountChanged)
 
-		Q_PROPERTY(ElementData * elements READ elements NOTIFY elementsChanged)
-
-//		Q_PROPERTY(ElementData * elements READ elements NOTIFY elementsChanged)
+		Q_PROPERTY(ElementData * elementData READ elementData NOTIFY elementDataChanged)
 
 		Problem(QObject * parent = nullptr);
 
@@ -51,7 +49,7 @@ class MODFEM_HEAT_API Problem:
 
 		int equationCount() const;
 
-		ElementData * elements() const;
+		ElementData * elementData() const;
 
 		Q_INVOKABLE void setDirectoryFromURL(const QUrl & url);
 
@@ -87,7 +85,7 @@ class MODFEM_HEAT_API Problem:
 
 		void equationCountChanged();
 
-		void elementsChanged();
+		void elementDataChanged();
 
 	private:
 		struct Members {
@@ -97,7 +95,7 @@ class MODFEM_HEAT_API Problem:
 			int fieldId;
 			int solutionCount;
 			int equationCount;
-			ElementData * elements;
+			ElementData * elementData;
 		};
 
 		cutehmi::MPtr<Members> m;

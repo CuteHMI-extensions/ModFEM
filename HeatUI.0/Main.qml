@@ -26,7 +26,42 @@ Item {
 		ColumnLayout {
 			Layout.alignment: Qt.AlignTop
 
-			//			Layout.fillWidth: true
+			GroupBox {
+				title: qsTr("Element selection")
+
+				Layout.minimumWidth: Math.max(parent.width, Layout.preferredWidth)
+
+				ButtonGroup { id: elementSelectionButtonGroup }
+
+				Column {
+					Row {
+						RadioButton {
+							id: elementSelectionAllButton
+
+							checked: true
+							text: qsTr("All")
+
+							ButtonGroup.group: elementSelectionButtonGroup
+						}
+
+						RadioButton {
+							id: elementSelectionSingleButton
+
+							checked: false
+							text: qsTr("Single")
+
+							ButtonGroup.group: elementSelectionButtonGroup
+						}
+					}
+
+					SpinBox {
+						enabled: elementSelectionSingleButton.checked
+						from: 1
+						to: heatProblem.elementData.count.elements
+
+					}
+				}
+			}
 
 			GroupBox {
 				title: qsTr("Visibility")
@@ -57,34 +92,34 @@ Item {
 				}
 			}
 
-//			GroupBox {
-//				title: qsTr("Surface visibility")
+			//			GroupBox {
+			//				title: qsTr("Surface visibility")
 
-//				Layout.minimumWidth: Math.max(parent.width, Layout.preferredWidth)
+			//				Layout.minimumWidth: Math.max(parent.width, Layout.preferredWidth)
 
-//				Column {
-//					CheckBox {
-//						id: surfaceCheckbox
+			//				Column {
+			//					CheckBox {
+			//						id: surfaceCheckbox
 
-//						checked: false
-//						text: qsTr("Nodes")
-//					}
+			//						checked: false
+			//						text: qsTr("Nodes")
+			//					}
 
-//					CheckBox {
-//						id: surfaceLinesCheckbox
+			//					CheckBox {
+			//						id: surfaceLinesCheckbox
 
-//						checked: false
-//						text: qsTr("Lines")
-//					}
+			//						checked: false
+			//						text: qsTr("Lines")
+			//					}
 
-//					CheckBox {
-//						id: surfaceFacesCheckbox
+			//					CheckBox {
+			//						id: surfaceFacesCheckbox
 
-//						checked: true
-//						text: qsTr("Faces")
-//					}
-//				}
-//			}
+			//						checked: true
+			//						text: qsTr("Faces")
+			//					}
+			//				}
+			//			}
 
 
 			GridLayout {
@@ -268,7 +303,7 @@ Item {
 						//						}
 
 						ElementsEntity {
-							elements: heatProblem.elements
+							elementData: heatProblem.elementData
 
 							rotationX: rotationXSlider.value
 							rotationY: rotationYSlider.value
@@ -280,18 +315,18 @@ Item {
 							facesEnabled: facesCheckbox.checked
 						}
 
-//						SurfaceEntity {
-//							surface: heatProblem.faces
+						//						SurfaceEntity {
+						//							surface: heatProblem.faces
 
-//							rotationX: rotationXSlider.value
-//							rotationY: rotationYSlider.value
-//							rotationZ: rotationZSlider.value
-//							scale: Math.pow(10, scaleSlider.value)
+						//							rotationX: rotationXSlider.value
+						//							rotationY: rotationYSlider.value
+						//							rotationZ: rotationZSlider.value
+						//							scale: Math.pow(10, scaleSlider.value)
 
-//							nodesEnabled: surfaceNodesCheckbox.checked
-//							linesEnabled: surfaceLinesCheckbox.checked
-//							facesEnabled: surfaceFacesCheckbox.checked
-//						}
+						//							nodesEnabled: surfaceNodesCheckbox.checked
+						//							linesEnabled: surfaceLinesCheckbox.checked
+						//							facesEnabled: surfaceFacesCheckbox.checked
+						//						}
 					}
 				}
 
@@ -361,7 +396,7 @@ Item {
 			MeshInfo {
 				Layout.minimumWidth: Math.max(parent.width, Layout.preferredWidth)
 
-				problem: heatProblem
+				elementData: heatProblem.elementData
 			}
 
 		}

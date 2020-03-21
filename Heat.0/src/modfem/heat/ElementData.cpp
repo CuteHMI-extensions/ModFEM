@@ -324,16 +324,16 @@ void ElementData::countEntities(int meshId)
 		elementId = mmr_get_next_act_elem(meshId, elementId);
 	}
 
+	m->count["elements"] = mmr_get_max_elem_id(meshId);
 	m->count["tetrahedrons"] = tetraCount;
 	m->count["prisms"] = prismCount;
 	m->count["bricks"] = brickCount;
 	m->count["triangles"] = triangleCount;
 	m->count["quads"] = quadCount;
 	m->count["faces"] = otherCount + triangleCount + quadCount;
-	m->count["lines"] = lineCount;
-	m->count["edges"] = mmr_get_max_edge_id(meshId);
+	m->count["edges"] = mmr_get_nr_edge(meshId);
 	m->count["nodes"] = mmr_get_nr_node(meshId);
-	m->count["elements"] = mmr_get_max_elem_id(meshId);
+	m->count["lines"] = lineCount;
 	emit countChanged();
 }
 

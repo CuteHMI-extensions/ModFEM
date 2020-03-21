@@ -147,9 +147,9 @@ int Problem::equationCount() const
 	return m->equationCount;
 }
 
-ElementData * Problem::elements() const
+ElementData * Problem::elementData() const
 {
-	return m->elements;
+	return m->elementData;
 }
 
 void Problem::setDirectoryFromURL(const QUrl & url)
@@ -217,7 +217,7 @@ void Problem::init()
 		setSolutionCount(pdr_ctrl_i_params(problemId(), 4));
 		setEquationCount(pdr_ctrl_i_params(problemId(), 5));
 
-		m->elements->init(meshId());
+		m->elementData->init(meshId());
 	}
 }
 

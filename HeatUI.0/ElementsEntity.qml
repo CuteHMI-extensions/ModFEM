@@ -9,7 +9,7 @@ Entity {
 	id: root
 
 	// Move Mesh from QtHeat to ModFEM.Mesh (also refactor Qt Heat to just Heat)
-	property Heat.ElementData elements
+	property Heat.ElementData elementData
 
 	property bool nodesEnabled: false
 
@@ -77,9 +77,9 @@ Entity {
 					vertexSize: 3
 					byteOffset: 0
 					byteStride: vertexSize * Float64Array.BYTES_PER_ELEMENT
-					count: elements.nodes.count
+					count: elementData.nodes.count
 					buffer: Buffer {
-						data: elements.nodes.coords
+						data: elementData.nodes.coords
 					}
 				}
 			}
@@ -106,9 +106,9 @@ Entity {
 					vertexSize: 3
 					byteOffset: 0
 					byteStride: vertexSize * Float64Array.BYTES_PER_ELEMENT
-					count: elements.lines.count *  2		// Each line is composed of two vertices.
+					count: elementData.lines.count *  2		// Each line is composed of two vertices.
 					buffer: Buffer {
-						data: elements.lines.coords
+						data: elementData.lines.coords
 					}
 				}
 			}
@@ -136,9 +136,9 @@ Entity {
 						vertexSize: 3
 						byteOffset: 0
 						byteStride: vertexSize * Float64Array.BYTES_PER_ELEMENT
-						count: elements.quads.triangleCount * 3			// 3 vertices per triangle.
+						count: elementData.quads.triangleCount * 3			// 3 vertices per triangle.
 						buffer: Buffer {
-							data: elements.quads.triangleNormals
+							data: elementData.quads.triangleNormals
 						}
 					}
 
@@ -149,9 +149,9 @@ Entity {
 						vertexSize: 3
 						byteOffset: 0
 						byteStride: vertexSize * Float64Array.BYTES_PER_ELEMENT
-						count: elements.quads.triangleCount * 3			// 3 vertices per triangle.
+						count: elementData.quads.triangleCount * 3			// 3 vertices per triangle.
 						buffer: Buffer {
-							data: elements.quads.triangleCoords
+							data: elementData.quads.triangleCoords
 						}
 					}
 				}
@@ -174,9 +174,9 @@ Entity {
 						vertexSize: 3
 						byteOffset: 0
 						byteStride: vertexSize * Float64Array.BYTES_PER_ELEMENT
-						count: elements.triangles.count * 3			// 3 vertices per triangle.
+						count: elementData.triangles.count * 3			// 3 vertices per triangle.
 						buffer: Buffer {
-							data: elements.triangles.normals
+							data: elementData.triangles.normals
 						}
 					}
 
@@ -187,9 +187,9 @@ Entity {
 						vertexSize: 3
 						byteOffset: 0
 						byteStride: vertexSize * Float64Array.BYTES_PER_ELEMENT
-						count: elements.triangles.count * 3		// 3 vertices per triangle.
+						count: elementData.triangles.count * 3		// 3 vertices per triangle.
 						buffer: Buffer {
-							data: elements.triangles.coords
+							data: elementData.triangles.coords
 						}
 					}
 				}
