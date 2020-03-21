@@ -10,7 +10,7 @@ import Qt3D.Extras 2.14
 import Qt.labs.platform 1.1
 import Qt.labs.settings 1.1
 
-import ModFEM.QtHeat 0.0
+import ModFEM.Heat 0.0
 
 Item {
 	anchors.fill: parent
@@ -24,28 +24,14 @@ Item {
 		anchors.fill: parent
 
 		ColumnLayout {
-			id: leftLayout
-
 			Layout.alignment: Qt.AlignTop
 
-			Layout.fillWidth: true
-
-			ProblemInfo {
-				Layout.minimumWidth: Math.max(leftLayout.width, Layout.preferredWidth)
-
-				problem: heatProblem
-			}
-
-			MeshInfo {
-				Layout.minimumWidth: Math.max(leftLayout.width, Layout.preferredWidth)
-
-				problem: heatProblem
-			}
+			//			Layout.fillWidth: true
 
 			GroupBox {
 				title: qsTr("Visibility")
 
-				Layout.minimumWidth: Math.max(leftLayout.width, Layout.preferredWidth)
+				Layout.minimumWidth: Math.max(parent.width, Layout.preferredWidth)
 
 				Column {
 					CheckBox {
@@ -70,6 +56,36 @@ Item {
 					}
 				}
 			}
+
+//			GroupBox {
+//				title: qsTr("Surface visibility")
+
+//				Layout.minimumWidth: Math.max(parent.width, Layout.preferredWidth)
+
+//				Column {
+//					CheckBox {
+//						id: surfaceCheckbox
+
+//						checked: false
+//						text: qsTr("Nodes")
+//					}
+
+//					CheckBox {
+//						id: surfaceLinesCheckbox
+
+//						checked: false
+//						text: qsTr("Lines")
+//					}
+
+//					CheckBox {
+//						id: surfaceFacesCheckbox
+
+//						checked: true
+//						text: qsTr("Faces")
+//					}
+//				}
+//			}
+
 
 			GridLayout {
 				columns: 2
@@ -138,6 +154,24 @@ Item {
 
 					onClicked: heatProblem.init()
 				}
+
+				Button {
+					text: qsTr("Solve")
+
+					onClicked: heatProblem.solve()
+				}
+
+				Button {
+					text: qsTr("Integrate")
+
+					onClicked: heatProblem.integrate()
+				}
+
+				Button {
+					text: qsTr("Write ParaView")
+
+					onClicked: heatProblem.writeParaview()
+				}
 			}
 
 			Rectangle {
@@ -166,10 +200,10 @@ Item {
 
 							property real lineWidth: 3
 
-//							ForwardRenderer {
-//								clearColor: "transparent"
-//								camera: camera1
-//							}
+							//							ForwardRenderer {
+							//								clearColor: "transparent"
+							//								camera: camera1
+							//							}
 
 							RenderSurfaceSelector {
 								ClearBuffers {
@@ -212,8 +246,11 @@ Item {
 							nearPlane : 0.1
 							farPlane : 1000.0
 							position: Qt.vector3d( 0.0, 0.0, 40.0 )
+							//							position: Qt.vector3d( 0.0, 0.0, 1.0 )
 							upVector: Qt.vector3d( 0.0, 1.0, 0.0 )
 							viewCenter: Qt.vector3d( 0.0, 0.0, 0.0 )
+
+							//							onViewVectorChanged: console.log(viewVector)
 						}
 
 						FirstPersonCameraController {
@@ -221,25 +258,40 @@ Item {
 							linearSpeed: 100
 						}
 
-//						TestEntity {
-//							nodesEnabled: nodesCheckbox.checked
+						//						TestEntity {
+						//							nodesEnabled: nodesCheckbox.checked
 
-//							rotationX: rotationXSlider.value
-//							rotationY: rotationYSlider.value
-//							rotationZ: rotationZSlider.value
-//							scale: scaleSlider.value
-//						}
+						//							rotationX: rotationXSlider.value
+						//							rotationY: rotationYSlider.value
+						//							rotationZ: rotationZSlider.value
+						//							scale: scaleSlider.value
+						//						}
 
-						MeshEntity {
+						ElementsEntity {
+							elements: heatProblem.elements
+
 							rotationX: rotationXSlider.value
 							rotationY: rotationYSlider.value
 							rotationZ: rotationZSlider.value
-							scale: scaleSlider.value
+							scale: Math.pow(10, scaleSlider.value)
 
 							nodesEnabled: nodesCheckbox.checked
 							linesEnabled: linesCheckbox.checked
 							facesEnabled: facesCheckbox.checked
 						}
+
+//						SurfaceEntity {
+//							surface: heatProblem.faces
+
+//							rotationX: rotationXSlider.value
+//							rotationY: rotationYSlider.value
+//							rotationZ: rotationZSlider.value
+//							scale: Math.pow(10, scaleSlider.value)
+
+//							nodesEnabled: surfaceNodesCheckbox.checked
+//							linesEnabled: surfaceLinesCheckbox.checked
+//							facesEnabled: surfaceFacesCheckbox.checked
+//						}
 					}
 				}
 
@@ -287,12 +339,31 @@ Item {
 
 					Slider {
 						id: scaleSlider
-						from: 0.1
-						to: 2
-						value: 1
+						//						from: 0.1
+						//						to: 2
+						from: -10
+						to: 10
+						value: 0
 					}
 				}
 			}
+		}
+
+		ColumnLayout {
+			Layout.alignment: Qt.AlignTop
+
+			ProblemInfo {
+				Layout.minimumWidth: Math.max(parent.width, Layout.preferredWidth)
+
+				problem: heatProblem
+			}
+
+			MeshInfo {
+				Layout.minimumWidth: Math.max(parent.width, Layout.preferredWidth)
+
+				problem: heatProblem
+			}
+
 		}
 	}
 

@@ -1,18 +1,18 @@
-#ifndef H_EXTENSIONS_MODFEM_QTHEAT_0_INCLUDE_MODFEM_QTHEAT_LOGGING_HPP
-#define H_EXTENSIONS_MODFEM_QTHEAT_0_INCLUDE_MODFEM_QTHEAT_LOGGING_HPP
+#ifndef H_EXTENSIONS_MODFEM_HEAT_0_INCLUDE_MODFEM_HEAT_LOGGING_HPP
+#define H_EXTENSIONS_MODFEM_HEAT_0_INCLUDE_MODFEM_HEAT_LOGGING_HPP
 
 #include "internal/platform.hpp"
 #include <cutehmi/loggingMacros.hpp>
 
-MODFEM_QTHEAT_API Q_DECLARE_LOGGING_CATEGORY(modfem_qtheat_0_loggingCategory)
+MODFEM_HEAT_API Q_DECLARE_LOGGING_CATEGORY(modfem_heat_0_loggingCategory)
 
 namespace modfem {
-namespace qtheat {
+namespace heat {
 
 inline
 const QLoggingCategory & loggingCategory()
 {
-	return modfem_qtheat_0_loggingCategory();
+	return modfem_heat_0_loggingCategory();
 }
 
 }

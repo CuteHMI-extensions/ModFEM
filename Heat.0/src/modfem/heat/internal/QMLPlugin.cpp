@@ -1,8 +1,27 @@
-#include <modfem/qtheat/logging.hpp>
+#include "QMLPlugin.hpp"
 
-Q_LOGGING_CATEGORY(modfem_qtheat_0_loggingCategory, "ModFEM.QtHeat.0")
+#include <modfem/heat/Problem.hpp>
+#include <modfem/heat/ElementData.hpp>
 
-//(c)C: Copyright © 2019, Michał Policht <michal@policht.pl>. All rights reserved.
+#include <QtQml>
+
+namespace modfem {
+namespace heat {
+namespace internal {
+
+void QMLPlugin::registerTypes(const char * uri)
+{
+	Q_ASSERT(uri == QLatin1String("ModFEM.Heat"));
+
+	qmlRegisterType<modfem::heat::Problem>(uri, MODFEM_HEAT_MAJOR, 0, "Problem");
+	qmlRegisterUncreatableType<modfem::heat::ElementData>(uri, MODFEM_HEAT_MAJOR, 0, "ElementData", "Class 'modfem::heat::ElementData' can not be instantiated from QML");
+}
+
+}
+}
+}
+
+//(c)C: Copyright © 2019-2020, Michał Policht <michal@policht.pl>. All rights reserved.
 //(c)C: This file is a part of CuteHMI.
 //(c)C: CuteHMI is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 //(c)C: CuteHMI is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.

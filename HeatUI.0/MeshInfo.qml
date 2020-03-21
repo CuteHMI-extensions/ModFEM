@@ -2,40 +2,46 @@ import QtQuick 2.0
 import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.3
 
-import ModFEM.QtHeat 0.0
+import ModFEM.Heat 0.0
 
-GroupBox {
-	title: qsTr("Mesh")
-
+ColumnLayout {
 	property Problem problem
 
-	ColumnLayout {
-//		Label {
-//			text: qsTr("Nodes: ") + problem.mesh.nodeCount
-//		}
 
-//		Label {
-//			text: qsTr("Triangle faces: ") + problem.mesh.faceData.triangleCount
-//		}
+	GroupBox {
+		Layout.minimumWidth: Math.max(parent.width, Layout.preferredWidth)
 
-//		Label {
-//			text: qsTr("Quad faces: ") + problem.mesh.faceData.quadCount
-//		}
+		title: qsTr("Total")
 
-		Label {
-			text: qsTr("Nodes: ") + problem.mesh.nodes.count
+		ColumnLayout {
+			Label {
+				text: qsTr("Elements: ") + problem.elements.count.elements
+			}
+
 		}
+	}
 
-		Label {
-			text: qsTr("Triangles: ") + problem.mesh.triangles.count
-		}
+	GroupBox {
+		Layout.minimumWidth: Math.max(parent.width, Layout.preferredWidth)
 
-		Label {
-			text: qsTr("Quads: ") + problem.mesh.quads.count
-		}
+		title: qsTr("Display")
 
-		Label {
-			text: qsTr("Lines: ") + problem.mesh.lines.count
+		ColumnLayout {
+			Label {
+				text: qsTr("Nodes: ") + problem.elements.nodes.count
+			}
+
+			Label {
+				text: qsTr("Triangles: ") + problem.elements.triangles.count
+			}
+
+			Label {
+				text: qsTr("Quads: ") + problem.elements.quads.count
+			}
+
+			Label {
+				text: qsTr("Lines: ") + problem.elements.lines.count
+			}
 		}
 	}
 }

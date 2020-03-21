@@ -1,17 +1,17 @@
-#ifndef H_EXTENSIONS_MODFEM_QTHEAT_0_INCLUDE_MODFEM_QTHEAT_PROBLEM_HPP
-#define H_EXTENSIONS_MODFEM_QTHEAT_0_INCLUDE_MODFEM_QTHEAT_PROBLEM_HPP
+#ifndef H_EXTENSIONS_MODFEM_HEAT_0_INCLUDE_MODFEM_HEAT_PROBLEM_HPP
+#define H_EXTENSIONS_MODFEM_HEAT_0_INCLUDE_MODFEM_HEAT_PROBLEM_HPP
 
 #include "internal/common.hpp"
-#include "Mesh.hpp"
+#include "ElementData.hpp"
 
 #include <QObject>
 #include <QUrl>
 #include <Qt3DRender/QBuffer>
 
 namespace modfem {
-namespace qtheat {
+namespace heat {
 
-class MODFEM_QTHEAT_API Problem:
+class MODFEM_HEAT_API Problem:
 	public QObject
 {
 		Q_OBJECT
@@ -29,7 +29,9 @@ class MODFEM_QTHEAT_API Problem:
 
 		Q_PROPERTY(int equationCount READ equationCount WRITE setEquationCount NOTIFY equationCountChanged)
 
-		Q_PROPERTY(Mesh * mesh READ mesh NOTIFY meshChanged)
+		Q_PROPERTY(ElementData * elements READ elements NOTIFY elementsChanged)
+
+//		Q_PROPERTY(ElementData * elements READ elements NOTIFY elementsChanged)
 
 		Problem(QObject * parent = nullptr);
 
@@ -49,11 +51,17 @@ class MODFEM_QTHEAT_API Problem:
 
 		int equationCount() const;
 
-		Mesh * mesh() const;
+		ElementData * elements() const;
 
 		Q_INVOKABLE void setDirectoryFromURL(const QUrl & url);
 
 		Q_INVOKABLE void init();
+
+		Q_INVOKABLE void solve();
+
+		Q_INVOKABLE void integrate();
+
+		Q_INVOKABLE void writeParaview();
 
 	protected slots:
 		void setProblemId(int problemId);
@@ -79,7 +87,7 @@ class MODFEM_QTHEAT_API Problem:
 
 		void equationCountChanged();
 
-		void meshChanged();
+		void elementsChanged();
 
 	private:
 		struct Members {
@@ -89,7 +97,7 @@ class MODFEM_QTHEAT_API Problem:
 			int fieldId;
 			int solutionCount;
 			int equationCount;
-			Mesh * mesh;
+			ElementData * elements;
 		};
 
 		cutehmi::MPtr<Members> m;

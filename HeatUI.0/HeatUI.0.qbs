@@ -19,11 +19,12 @@ Project {
 		description: "Heat user interface."
 
 		files: [
+         "ElementsEntity.qml",
          "Main.qml",
-         "MeshEntity.qml",
          "MeshInfo.qml",
          "ProblemInfo.qml",
-		 "Scene3D.qml",
+         "Scene3D.qml",
+		 "SurfaceEntity.qml",
          "TestEntity.qml",
      ]
 

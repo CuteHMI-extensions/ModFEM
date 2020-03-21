@@ -1,29 +1,31 @@
-#include "QMLPlugin.hpp"
+#ifndef H_EXTENSIONS_MODFEM_HEAT_0_INCLUDE_MODFEM_HEAT_INTERNAL_QMLPLUGIN_HPP
+#define H_EXTENSIONS_MODFEM_HEAT_0_INCLUDE_MODFEM_HEAT_INTERNAL_QMLPLUGIN_HPP
 
-#include <modfem/qtheat/Problem.hpp>
-#include <modfem/qtheat/Mesh.hpp>
-#include <modfem/qtheat/FaceData.hpp>
+#include <QQmlExtensionPlugin>
 
-#include <QtQml>
+class QJSEngine;
 
 namespace modfem {
-namespace qtheat {
+namespace heat {
 namespace internal {
 
-void QMLPlugin::registerTypes(const char * uri)
+class QMLPlugin:
+	public QQmlExtensionPlugin
 {
-	Q_ASSERT(uri == QLatin1String("ModFEM.QtHeat"));
+		Q_OBJECT
+		Q_PLUGIN_METADATA(IID QQmlExtensionInterface_iid)
 
-	qmlRegisterType<modfem::qtheat::Problem>(uri, MODFEM_QTHEAT_MAJOR, 0, "Problem");
-	qmlRegisterType<modfem::qtheat::Mesh>(uri, MODFEM_QTHEAT_MAJOR, 0, "Mesh");
-	qmlRegisterUncreatableType<modfem::qtheat::FaceData>(uri, MODFEM_QTHEAT_MAJOR, 0, "FaceData", "Class 'modfem::qtheat::FaceData' can not be instantiated from QML");
-}
+	public:
+		void registerTypes(const char * uri) override;
+};
 
 }
 }
 }
 
-//(c)C: Copyright © 2019-2020, Michał Policht <michal@policht.pl>. All rights reserved.
+#endif
+
+//(c)C: Copyright © 2019, Michał Policht <michal@policht.pl>. All rights reserved.
 //(c)C: This file is a part of CuteHMI.
 //(c)C: CuteHMI is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 //(c)C: CuteHMI is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.

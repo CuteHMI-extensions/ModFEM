@@ -1,4 +1,4 @@
-#include "../../../include/modfem/qtheat/Problem.hpp"
+#include "../../../include/modfem/heat/Problem.hpp"
 
 #include <QSettings>
 #include <QDir>
@@ -87,7 +87,7 @@ double pdr_heat_initial_condition(
 );
 
 namespace modfem {
-namespace qtheat {
+namespace heat {
 
 Problem::Problem(QObject * parent):
 	QObject(parent),
@@ -97,7 +97,7 @@ Problem::Problem(QObject * parent):
 					0,
 					0,
 					0,
-					new Mesh(this)})
+					new ElementData(this)})
 {
 	QSettings settings;
 	setDirectory(settings.value("ModFEM/QtHeat.0/directory", ".").toString());
@@ -147,9 +147,9 @@ int Problem::equationCount() const
 	return m->equationCount;
 }
 
-Mesh * Problem::mesh() const
+ElementData * Problem::elements() const
 {
-	return m->mesh;
+	return m->elements;
 }
 
 void Problem::setDirectoryFromURL(const QUrl & url)
@@ -217,8 +217,146 @@ void Problem::init()
 		setSolutionCount(pdr_ctrl_i_params(problemId(), 4));
 		setEquationCount(pdr_ctrl_i_params(problemId(), 5));
 
-		m->mesh->init(meshId());
+		m->elements->init(meshId());
 	}
+}
+
+void Problem::solve()
+{
+	utv_SIGINT_not_caught = 1;
+
+#ifdef PARALLEL
+	if (pcr_my_proc_id() == pcr_print_master()) {
+#endif
+		printf("\nBeginning solution of a single heat problem\n\n");
+#ifdef PARALLEL
+	}
+#endif
+
+	double timer_all = time_clock();
+
+#ifdef PARALLEL
+	{
+		/* initiate exchange tables for DOFs - for one field,  max_num_levels */
+// one DOF - offset = 0, nreq = 1;
+		int nr_levels = pdr_get_max_num_grid_levels(problem_id);
+		pdv_exchange_table_index = appr_init_exchange_tables(pcr_nr_proc(),
+						pcr_my_proc_id(),
+						field_id, 0, 1,
+						nr_levels);
+	}
+#endif
+
+
+	/*---------- main solution procedure ------------*/
+
+	char solver_heat_filename[300];;
+
+	if (pdr_lins_i_params(problemId(), 1) >= 0) { // mkb interface
+
+		int max_iter = -1;
+		int error_type = -1;
+		double error_tolerance = -1;
+		int monitoring_level = -1;
+
+		// when no parameter file passed - take control parameters from problem input file
+		if (0 == strlen(pdv_heat_problem.ctrl.solver_filename)) {
+
+			strcpy(solver_heat_filename, pdv_heat_problem.ctrl.solver_filename);
+			max_iter = pdr_lins_i_params(problemId(), 2); // max_iter
+			error_type = pdr_lins_i_params(problemId(), 3); // error_type
+			error_tolerance = pdr_lins_d_params(problemId(), 4); // error_tolerance
+			monitoring_level = pdr_lins_i_params(problemId(), 5);  // monitoring level
+
+			/*kbw
+				fprintf(Interactive_output, "heat solver parameters: maxiter %d, error_type %d, error_meas %.15lf, monitor %d\n",
+					pdr_lins_i_params(problem_id, 2), // max_iter
+					pdr_lins_i_params(problem_id, 3), // error_type
+					pdr_lins_d_params(problem_id, 4), // error_tolerance
+					pdr_lins_i_params(problem_id, 5)  // monitoring level
+					);
+			/*kew*/
+
+		}
+		else {
+
+			sprintf(solver_heat_filename, "%s/%s",
+					pdv_heat_problem.ctrl.work_dir, pdv_heat_problem.ctrl.solver_filename);
+
+		}
+
+		int parallel = SIC_SEQUENTIAL;
+#ifdef PARALLEL
+		parallel = SIC_PARALLEL;
+#endif
+
+		/*kbw*/
+		printf("initializing heat solver (file %s)\n", solver_heat_filename);
+		printf("parameters: parallel %d, maxiter %d, error_type %d, error_meas %.15lf, monitor %d\n",
+				parallel, max_iter,  error_type,  error_tolerance, monitoring_level);
+		/*kbw*/
+
+		int solver_heat_id = sir_init(pdr_lins_i_params(problemId(), 1), parallel,
+						pdr_get_max_num_grid_levels(problemId()),
+						solver_heat_filename, max_iter, error_type,
+						error_tolerance, monitoring_level);
+
+		pdv_heat_problem.ctrl.solver_id = solver_heat_id; // !!! for callback procedures !!!
+		sir_create(solver_heat_id, problemId());
+
+		int ini_guess = 0; //  no initial guess from data structure
+		int nr_iter = max_iter;
+		double conv_meas = error_tolerance;
+		int monitor =  monitoring_level;
+		double conv_rate;
+		/*------------ CALLING ITERATIVE SOLVER ------------------*/
+		sir_solve(solver_heat_id, SIC_SOLVE, ini_guess, monitor,
+				&nr_iter, &conv_meas, &conv_rate);
+		printf("\nAfter %d iterations of linear solver for heat problem\n",
+				nr_iter);
+		printf("Convergence measure: %15.12lf, convergence rate %lf\n",
+				conv_meas, conv_rate);
+
+		sir_free(solver_heat_id);
+
+		sir_destroy(solver_heat_id);
+
+#ifdef PARALLEL
+		/* free exchange tables for DOFs - for one field = one solver */
+		appr_free_exchange_tables(pdv_exchange_table_index);
+#endif
+
+	}
+}
+
+void Problem::integrate()
+{
+	QDir problemDir(directory());
+	FILE * interactiveInput = stdin;
+	FILE * interactiveOutput = stdout;
+
+	utv_SIGINT_not_caught = 1;
+
+	printf("\nBeginning time integration of heat problem\n\n");
+
+	double timer_all = time_clock();
+
+	/*---------- main time integration procedure ------------*/
+	pdr_heat_time_integration(problemDir.path().toLocal8Bit().data(), interactiveInput, interactiveOutput);
+	std::cout.flush();
+
+	timer_all = time_clock() - timer_all;
+
+	printf("\nExecution time total: %lf\n", timer_all);
+}
+
+void Problem::writeParaview()
+{
+	QDir problemDir(directory());
+	FILE * interactiveInput = stdin;
+	FILE * interactiveOutput = stdout;
+
+	pdr_heat_write_paraview(problemDir.path().toLocal8Bit().data(), interactiveInput, interactiveOutput);
 }
 
 void Problem::setProblemId(int problemId)

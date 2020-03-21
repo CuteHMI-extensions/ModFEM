@@ -1,27 +1,7 @@
-#ifndef H_EXTENSIONS_MODFEM_QTHEAT_0_INCLUDE_MODFEM_QTHEAT_INTERNAL_QMLPLUGIN_HPP
-#define H_EXTENSIONS_MODFEM_QTHEAT_0_INCLUDE_MODFEM_QTHEAT_INTERNAL_QMLPLUGIN_HPP
+#ifndef H_EXTENSIONS_MODFEM_HEAT_0_INCLUDE_MODFEM_HEAT_METADATA_HPP
+#define H_EXTENSIONS_MODFEM_HEAT_0_INCLUDE_MODFEM_HEAT_METADATA_HPP
 
-#include <QQmlExtensionPlugin>
-
-class QJSEngine;
-
-namespace modfem {
-namespace qtheat {
-namespace internal {
-
-class QMLPlugin:
-	public QQmlExtensionPlugin
-{
-		Q_OBJECT
-		Q_PLUGIN_METADATA(IID QQmlExtensionInterface_iid)
-
-	public:
-		void registerTypes(const char * uri) override;
-};
-
-}
-}
-}
+#include "../cutehmi.metadata.hpp"
 
 #endif
 

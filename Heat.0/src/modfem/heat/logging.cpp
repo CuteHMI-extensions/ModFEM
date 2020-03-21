@@ -1,9 +1,6 @@
-#ifndef H_EXTENSIONS_MODFEM_QTHEAT_0_INCLUDE_MODFEM_QTHEAT_METADATA_HPP
-#define H_EXTENSIONS_MODFEM_QTHEAT_0_INCLUDE_MODFEM_QTHEAT_METADATA_HPP
+#include <modfem/heat/logging.hpp>
 
-#include "../cutehmi.metadata.hpp"
-
-#endif
+Q_LOGGING_CATEGORY(modfem_heat_0_loggingCategory, "ModFEM.Heat.0")
 
 //(c)C: Copyright © 2019, Michał Policht <michal@policht.pl>. All rights reserved.
 //(c)C: This file is a part of CuteHMI.

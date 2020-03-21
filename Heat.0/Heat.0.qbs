@@ -3,7 +3,7 @@ import qbs
 import cutehmi
 
 Project {
-	name: "ModFEM.QtHeat.0"
+	name: "ModFEM.Heat.0"
 
 	cutehmi.CppExtension {
 		name: parent.name
@@ -17,21 +17,19 @@ Project {
 		description: "Heat user interface."
 
 		files: [
-         "include/modfem/qtheat/ElementData.hpp",
-         "include/modfem/qtheat/FaceData.hpp",
-         "include/modfem/qtheat/Mesh.hpp",
-         "include/modfem/qtheat/Problem.hpp",
-         "include/modfem/qtheat/internal/common.hpp",
-         "include/modfem/qtheat/internal/platform.hpp",
-         "include/modfem/qtheat/logging.hpp",
-         "include/modfem/qtheat/metadata.hpp",
-         "src/modfem/qtheat/ElementData.cpp",
-         "src/modfem/qtheat/FaceData.cpp",
-         "src/modfem/qtheat/Mesh.cpp",
-         "src/modfem/qtheat/Problem.cpp",
-         "src/modfem/qtheat/internal/QMLPlugin.cpp",
-         "src/modfem/qtheat/internal/QMLPlugin.hpp",
-         "src/modfem/qtheat/logging.cpp",
+         "include/modfem/heat/BoundaryConditionsData.hpp",
+         "include/modfem/heat/ElementData.hpp",
+         "include/modfem/heat/Problem.hpp",
+         "include/modfem/heat/internal/common.hpp",
+         "include/modfem/heat/internal/platform.hpp",
+         "include/modfem/heat/logging.hpp",
+         "include/modfem/heat/metadata.hpp",
+         "src/modfem/heat/BoundaryConditionsData.cpp",
+         "src/modfem/heat/ElementData.cpp",
+         "src/modfem/heat/Problem.cpp",
+         "src/modfem/heat/internal/QMLPlugin.cpp",
+         "src/modfem/heat/internal/QMLPlugin.hpp",
+         "src/modfem/heat/logging.cpp",
      ]
 
 		Depends { name: "Qt.3drender" }
