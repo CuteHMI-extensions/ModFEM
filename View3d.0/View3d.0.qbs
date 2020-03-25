@@ -46,9 +46,19 @@ Project {
 			fileTags: ["fbx"]
 		}
 
+		FileTagger {
+			patterns: "*.vert"
+			fileTags: ["vert"]
+		}
+
+		FileTagger {
+			patterns: "*.frag"
+			fileTags: ["frag"]
+		}
+
 		Group {
 			name: "3D assets"
-			fileTagsFilter: ["fbx"]
+			fileTagsFilter: ["fbx", "vert", "frag"]
 			qbs.install: true
 			qbs.installSourceBase: installSourceBase
 			qbs.installDir: dedicatedInstallSubdir

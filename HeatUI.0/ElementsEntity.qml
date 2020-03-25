@@ -41,13 +41,17 @@ Entity {
 		shininess: 0.0
 	}
 
-	PhongMaterial {
-		id: faceMaterial
+//	PhongMaterial {
+//		id: faceMaterial
 
-		diffuse: Qt.rgba(0.1, 0.5, 0.1, 1.0)
-		ambient: Qt.rgba(0.2, 0.6, 0.2, 1.0)
-		specular: Qt.rgba(0.2, 0.8, 0.2, 1.0)
-		shininess: 1.0
+//		diffuse: Qt.rgba(0.1, 0.5, 0.1, 1.0)
+//		ambient: Qt.rgba(0.2, 0.6, 0.2, 1.0)
+//		specular: Qt.rgba(0.2, 0.8, 0.2, 1.0)
+//		shininess: 1.0
+//	}
+
+	PerVertexColorMaterial {
+		id: faceMaterial
 	}
 
 	Transform {
@@ -57,6 +61,46 @@ Entity {
 		rotationX: root.rotationX
 		rotationY: root.rotationY
 		rotationZ: root.rotationZ
+	}
+
+	property var bcColorMap: [
+		Qt.rgba(0.8, 0.1, 0.4, 1.0),
+		Qt.rgba(0.8, 0.1, 0.4, 1.0),
+		Qt.rgba(0.8, 0.1, 0.4, 1.0),
+		Qt.rgba(0.8, 0.1, 0.4, 1.0),
+		Qt.rgba(0.8, 0.1, 0.4, 1.0),
+		Qt.rgba(0.8, 0.1, 0.4, 1.0),
+		Qt.rgba(0.8, 0.1, 0.4, 1.0),
+		Qt.rgba(0.8, 0.1, 0.4, 1.0),
+		Qt.rgba(0.8, 0.1, 0.4, 1.0),
+		Qt.rgba(0.8, 0.1, 0.4, 1.0),
+		Qt.rgba(0.8, 0.1, 0.4, 1.0),
+		Qt.rgba(0.8, 0.1, 0.4, 1.0),
+		Qt.rgba(0.8, 0.1, 0.4, 1.0),
+		Qt.rgba(0.8, 0.1, 0.4, 1.0),
+		Qt.rgba(0.8, 0.1, 0.4, 1.0),
+//		Qt.hsla(0.0, 1.0, 0.35, 1.0),
+//		Qt.hsla(0.125, 1.0, 0.35, 1.0),
+//		Qt.hsla(0.25, 1.0, 0.35, 1.0),
+//		Qt.hsla(0.375, 1.0, 0.35, 1.0),
+//		Qt.hsla(0.5, 1.0, 0.35, 1.0),
+//		Qt.hsla(0.625, 1.0, 0.35, 1.0),
+//		Qt.hsla(0.75, 1.0, 0.35, 1.0),
+//		Qt.hsla(0.875, 1.0, 0.35, 1.0)
+	]
+
+	Heat.VertexColorMapper {
+		id: trianglesVertexColorMapper
+
+		map: bcColorMap
+		colorIndices: elementData.triangles.boundaryConditions ? elementData.triangles.boundaryConditions : new ArrayBuffer
+	}
+
+	Heat.VertexColorMapper {
+		id: quadsTriangleVertexColorMapper
+
+		map: bcColorMap
+		colorIndices: elementData.quads.triangleBoundaryConditions ? elementData.quads.triangleBoundaryConditions : new ArrayBuffer
 	}
 
 	Entity {
@@ -73,10 +117,10 @@ Entity {
 				Attribute {
 					name: defaultPositionAttributeName
 					attributeType: Attribute.VertexAttribute
-					vertexBaseType: Attribute.Double
+					vertexBaseType: Attribute.Float
 					vertexSize: 3
 					byteOffset: 0
-					byteStride: vertexSize * Float64Array.BYTES_PER_ELEMENT
+					byteStride: vertexSize * Float32Array.BYTES_PER_ELEMENT
 					count: elementData.nodes.count
 					buffer: Buffer {
 						data: elementData.nodes.coords
@@ -102,10 +146,10 @@ Entity {
 				Attribute {
 					name: defaultPositionAttributeName
 					attributeType: Attribute.VertexAttribute
-					vertexBaseType: Attribute.Double
+					vertexBaseType: Attribute.Float
 					vertexSize: 3
 					byteOffset: 0
-					byteStride: vertexSize * Float64Array.BYTES_PER_ELEMENT
+					byteStride: vertexSize * Float32Array.BYTES_PER_ELEMENT
 					count: elementData.lines.count *  2		// Each line is composed of two vertices.
 					buffer: Buffer {
 						data: elementData.lines.coords
@@ -132,10 +176,10 @@ Entity {
 					Attribute {
 						name: defaultNormalAttributeName
 						attributeType: Attribute.VertexAttribute
-						vertexBaseType: Attribute.Double
+						vertexBaseType: Attribute.Float
 						vertexSize: 3
 						byteOffset: 0
-						byteStride: vertexSize * Float64Array.BYTES_PER_ELEMENT
+						byteStride: vertexSize * Float32Array.BYTES_PER_ELEMENT
 						count: elementData.quads.triangleCount * 3			// 3 vertices per triangle.
 						buffer: Buffer {
 							data: elementData.quads.triangleNormals
@@ -143,12 +187,25 @@ Entity {
 					}
 
 					Attribute {
-						name: defaultPositionAttributeName
+						name: defaultColorAttributeName
 						attributeType: Attribute.VertexAttribute
-						vertexBaseType: Attribute.Double
+						vertexBaseType: Attribute.Float
 						vertexSize: 3
 						byteOffset: 0
-						byteStride: vertexSize * Float64Array.BYTES_PER_ELEMENT
+						byteStride: vertexSize * Float32Array.BYTES_PER_ELEMENT
+						count: quadsTriangleVertexColorMapper.count
+						buffer: Buffer {
+							data: quadsTriangleVertexColorMapper.colorVertices
+						}
+					}
+
+					Attribute {
+						name: defaultPositionAttributeName
+						attributeType: Attribute.VertexAttribute
+						vertexBaseType: Attribute.Float
+						vertexSize: 3
+						byteOffset: 0
+						byteStride: vertexSize * Float32Array.BYTES_PER_ELEMENT
 						count: elementData.quads.triangleCount * 3			// 3 vertices per triangle.
 						buffer: Buffer {
 							data: elementData.quads.triangleCoords
@@ -170,10 +227,10 @@ Entity {
 					Attribute {
 						name: defaultNormalAttributeName
 						attributeType: Attribute.VertexAttribute
-						vertexBaseType: Attribute.Double
+						vertexBaseType: Attribute.Float
 						vertexSize: 3
 						byteOffset: 0
-						byteStride: vertexSize * Float64Array.BYTES_PER_ELEMENT
+						byteStride: vertexSize * Float32Array.BYTES_PER_ELEMENT
 						count: elementData.triangles.count * 3			// 3 vertices per triangle.
 						buffer: Buffer {
 							data: elementData.triangles.normals
@@ -181,12 +238,25 @@ Entity {
 					}
 
 					Attribute {
-						name: defaultPositionAttributeName
+						name: defaultColorAttributeName
 						attributeType: Attribute.VertexAttribute
-						vertexBaseType: Attribute.Double
+						vertexBaseType: Attribute.Float
 						vertexSize: 3
 						byteOffset: 0
-						byteStride: vertexSize * Float64Array.BYTES_PER_ELEMENT
+						byteStride: vertexSize * Float32Array.BYTES_PER_ELEMENT
+						count: trianglesVertexColorMapper.count
+						buffer: Buffer {
+							data: trianglesVertexColorMapper.colorVertices
+						}
+					}
+
+					Attribute {
+						name: defaultPositionAttributeName
+						attributeType: Attribute.VertexAttribute
+						vertexBaseType: Attribute.Float
+						vertexSize: 3
+						byteOffset: 0
+						byteStride: vertexSize * Float32Array.BYTES_PER_ELEMENT
 						count: elementData.triangles.count * 3		// 3 vertices per triangle.
 						buffer: Buffer {
 							data: elementData.triangles.coords

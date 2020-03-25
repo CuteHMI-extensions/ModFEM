@@ -14,7 +14,7 @@ class MODFEM_HEAT_API ElementData:
 		Q_OBJECT
 
 	public:
-		/// @todo switch beteen active/inactive.
+		typedef float real;
 
 		Q_PROPERTY(QVariantMap count READ count NOTIFY countChanged)
 
@@ -42,7 +42,9 @@ class MODFEM_HEAT_API ElementData:
 	public slots:
 		void init(int meshId);
 
-//		void selectElement(int index);
+		void selectAll();
+
+		void selectElement(int index);
 
 	signals:
 		void countChanged();
@@ -56,14 +58,29 @@ class MODFEM_HEAT_API ElementData:
 		void linesChanged();
 
 	private:
+		// Dimension of coordinate.
+		static constexpr std::size_t COORD_DIM = 3;
+
 		// Size of coordinate in bytes.
-		static constexpr int COORD_SIZE = sizeof(double) * 3;
+		static constexpr std::size_t COORD_SIZE = sizeof(real) * COORD_DIM;
+
+		// Dimension of index.
+		static constexpr std::size_t INDEX_DIM = 1;
 
 		// Size of index in bytes.
-		static constexpr int INDEX_SIZE = sizeof(int);
+		static constexpr std::size_t INDEX_SIZE = sizeof(int) * INDEX_DIM;
+
+		// Dimension of normal vector.
+		static constexpr std::size_t NORMAL_DIM = 3;
 
 		// Size of normal vector in bytes.
-		static constexpr int NORMAL_SIZE = sizeof(double) * 3;
+		static constexpr std::size_t NORMAL_SIZE = sizeof(real) * NORMAL_DIM;
+
+		// Dimension of boundary condition.
+		static constexpr std::size_t BOUNDARY_CONDITION_DIM = 1;
+
+		// Size of boundary condition in bytes.
+		static constexpr std::size_t BOUNDARY_CONDITION_SIZE = sizeof(int) * BOUNDARY_CONDITION_DIM;
 
 		void clearArrays();
 
@@ -77,6 +94,12 @@ class MODFEM_HEAT_API ElementData:
 
 		void countEntities(int meshId);
 
+		template <std::size_t DIM, typename T>
+		void appendRealVector(T * vector,  QByteArray & array);
+
+		template <std::size_t DIM, typename T>
+		void appendScalar(T scalar,  QByteArray & array);
+
 		struct Members {
 			int meshId;
 			QVariantMap count;
@@ -89,16 +112,35 @@ class MODFEM_HEAT_API ElementData:
 			QByteArray triangleCoords;
 			QByteArray triangleIndices;
 			QByteArray triangleNormals;
+			QByteArray triangleBoundaryConditions;
 			QByteArray quadCoords;
 			QByteArray quadIndices;
 			QByteArray quadNormals;
+			QByteArray quadBoundaryConditions;
 			QByteArray quadTriangleCoords;
 			QByteArray quadTriangleIndices;
 			QByteArray quadTriangleNormals;
+			QByteArray quadTriangleBoundaryConditions;
 		};
 
 		cutehmi::MPtr<Members> m;
 };
+
+template<std::size_t DIM, typename T>
+void ElementData::appendRealVector(T * vector, QByteArray & array)
+{
+	real realVector[DIM];
+	for (std::size_t i = 0; i < DIM; i++)
+		realVector[i] = vector[i];
+
+	array.append(reinterpret_cast<char *>(realVector), sizeof(real) * DIM);
+}
+
+template<std::size_t DIM, typename T>
+void ElementData::appendScalar(T scalar, QByteArray & array)
+{
+	array.append(reinterpret_cast<char *>(& scalar), sizeof(T) * DIM);
+}
 
 }
 }

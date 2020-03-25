@@ -24,6 +24,9 @@ ElementData::ElementData(QObject * parent):
 	{},
 	{},
 	{},
+	{},
+	{},
+	{},
 	{}})
 {
 	m->count["elements"] = 0;
@@ -65,23 +68,46 @@ void ElementData::init(int meshId)
 {
 	m->meshId = meshId;
 	countEntities(meshId);
-	clearArrays();
 	reserveArrays();
-	updateArrays(meshId);
+	selectAll();
+}
+
+void ElementData::selectAll()
+{
+	if (m->meshId != 0) {
+		clearArrays();
+		updateArrays(m->meshId);
+		updateProperties();
+	} else
+		CUTEHMI_WARNING("Attempting to select elements on uninitialized mesh.");
+}
+
+void ElementData::selectElement(int index)
+{
+	if (m->meshId != 0) {
+		clearArrays();
+		updateArrays(m->meshId, index);
+		updateProperties();
+	} else
+		CUTEHMI_WARNING("Attempting to select the element on uninitialized mesh.");
 }
 
 void ElementData::clearArrays()
 {
+	m->nodeCoords.clear();
 	m->lineCoords.clear();
 	m->triangleCoords.clear();
 	m->triangleIndices.clear();
 	m->triangleNormals.clear();
+	m->triangleBoundaryConditions.clear();
 	m->quadCoords.clear();
 	m->quadIndices.clear();
 	m->quadNormals.clear();
+	m->quadBoundaryConditions.clear();
 	m->quadTriangleCoords.clear();
 	m->quadTriangleIndices.clear();
 	m->quadTriangleNormals.clear();
+	m->quadTriangleBoundaryConditions.clear();
 }
 
 void ElementData::reserveArrays()
@@ -90,13 +116,16 @@ void ElementData::reserveArrays()
 	m->triangleCoords.reserve(m->count["triangles"].toInt() * 3 * COORD_SIZE);
 	m->triangleIndices.reserve(m->count["triangles"].toInt() * 3 * INDEX_SIZE);
 	m->triangleNormals.reserve(m->count["triangles"].toInt() * 3 * NORMAL_SIZE);
+	m->triangleBoundaryConditions.reserve(m->count["triangles"].toInt() * 3 * BOUNDARY_CONDITION_SIZE);
 	m->quadCoords.reserve(m->count["quads"].toInt() * 4 * COORD_SIZE);
 	m->quadIndices.reserve(m->count["quads"].toInt() * 4 * INDEX_SIZE);
 	m->quadNormals.reserve(m->count["quads"].toInt() * 4 * NORMAL_SIZE);
+	m->quadBoundaryConditions.reserve(m->count["quads"].toInt() * 4 * BOUNDARY_CONDITION_SIZE);
 	m->quadTriangleCoords.reserve(m->count["quads"].toInt() * 6 * COORD_SIZE);
 	m->quadTriangleIndices.reserve(m->count["quads"].toInt() * 6 * INDEX_SIZE);
 	m->quadTriangleNormals.reserve(m->count["quads"].toInt() * 6 * NORMAL_SIZE);
-	m->nodeCoords.reserve(m->nodes["count"].toInt() * COORD_SIZE);	/// @todo adding a nodes per face requires different value.
+	m->quadTriangleBoundaryConditions.reserve(m->count["quads"].toInt() * 6 * BOUNDARY_CONDITION_SIZE);
+	m->nodeCoords.reserve(m->nodes["count"].toInt() * COORD_SIZE);	/// @todo Adding a nodes per face will require different value.
 }
 
 void ElementData::updateArrays(int meshId)
@@ -108,16 +137,14 @@ void ElementData::updateArrays(int meshId)
 		elementId = mmr_get_next_act_elem(meshId, elementId);
 	}
 
-	/// @todo add nodes per face.
+	/// @todo Move this to updateArrays(int meshId, elementId) and add nodes per face.
 	double coords[3];
 	for (int i = 1; i <= mmr_get_max_node_id(meshId); i++) {
 		if (mmr_node_status(meshId, i) == MMC_ACTIVE) {
 			mmr_node_coor(meshId, i, coords);
-			m->nodeCoords.append(reinterpret_cast<char *>(coords), COORD_SIZE);
+			appendRealVector<COORD_DIM>(coords, m->nodeCoords);
 		}
 	}
-
-	updateProperties();
 }
 
 void ElementData::updateArrays(int meshId, int elementId)
@@ -129,11 +156,11 @@ void ElementData::updateArrays(int meshId, int elementId)
 	//<ModFEM.Mesh-1.workaround target="ModFEM-mm_t4_prism" cause="bug">
 	// Instead of:
 	// double coords[4 * 3];	// Quad faces require 4 coordinates (times x, y, z).
-	double coords[3];	// Space required for x, y, z coordinates.
+	double vector3[3];	// Space required for x, y, z coordinates.
 	//</ModFEM.Mesh-1.workaround>
 	int indices[5];		// Quad faces require 5 indices (first element contains amount of coordinates).
-	double normal[3];	// Normal vector, perpendicular to surface.
 	double area;		// Face area.
+	int bc;				// Boundary condition flag.
 
 	mmr_el_faces(meshId, elementId, faces, orientation);
 	CUTEHMI_ASSERT(faces[0] < FACES_MAX, "not enough space reserved for 'faces' array");
@@ -148,30 +175,36 @@ void ElementData::updateArrays(int meshId, int elementId)
 				// triangleCoords.append(reinterpret_cast<char *>(coords), COORD_SIZE * 3);
 				mmr_fa_node_coor(meshId, faces[i], indices, nullptr);
 
-				mmr_node_coor(meshId, indices[1], coords);
-				m->triangleCoords.append(reinterpret_cast<char *>(coords), COORD_SIZE);
-				m->lineCoords.append(reinterpret_cast<char *>(coords), COORD_SIZE);
+				mmr_node_coor(meshId, indices[1], vector3);
+				appendRealVector<COORD_DIM>(vector3, m->triangleCoords);
+				appendRealVector<COORD_DIM>(vector3, m->lineCoords);
 
-				mmr_node_coor(meshId, indices[2], coords);
-				m->triangleCoords.append(reinterpret_cast<char *>(coords), COORD_SIZE);
-				m->lineCoords.append(reinterpret_cast<char *>(coords), COORD_SIZE);
+				mmr_node_coor(meshId, indices[2], vector3);
+				appendRealVector<COORD_DIM>(vector3, m->triangleCoords);
+				appendRealVector<COORD_DIM>(vector3, m->lineCoords);
 
-				m->lineCoords.append(reinterpret_cast<char *>(coords), COORD_SIZE);
-				mmr_node_coor(meshId, indices[3], coords);
-				m->triangleCoords.append(reinterpret_cast<char *>(coords), COORD_SIZE);
-				m->lineCoords.append(reinterpret_cast<char *>(coords), COORD_SIZE);
+				appendRealVector<COORD_DIM>(vector3, m->lineCoords);
+				mmr_node_coor(meshId, indices[3], vector3);
+				appendRealVector<COORD_DIM>(vector3, m->triangleCoords);
+				appendRealVector<COORD_DIM>(vector3, m->lineCoords);
 
-				m->lineCoords.append(reinterpret_cast<char *>(coords), COORD_SIZE);
-				mmr_node_coor(meshId, indices[1], coords);
-				m->lineCoords.append(reinterpret_cast<char *>(coords), COORD_SIZE);
+				appendRealVector<COORD_DIM>(vector3, m->lineCoords);
+				mmr_node_coor(meshId, indices[1], vector3);
+				appendRealVector<COORD_DIM>(vector3, m->lineCoords);
 				//</ModFEM.Mesh-1.workaround>
 
-				m->triangleIndices.append(reinterpret_cast<char *>(indices + 1), INDEX_SIZE * 3);	// First element contains amount of coordinates.
+				appendRealVector<INDEX_DIM * 3>(indices + 1, m->triangleIndices);	// First element contains amount of coordinates.
 
 				// Append normal to each vertex.
-				mmr_fa_area(meshId, faces[i], & area, normal);
+				mmr_fa_area(meshId, faces[i], & area, vector3);
 				for (int i = 0; i < 3; i++)
-					m->triangleNormals.append(reinterpret_cast<char *>(normal), NORMAL_SIZE);
+					appendRealVector<NORMAL_DIM>(vector3, m->triangleNormals);
+
+				// Append boundary condition flags to each vertex.
+
+				bc = mmr_fa_bc(meshId, faces[i]);
+				for (int i = 0; i < 3; i++)
+					appendScalar<BOUNDARY_CONDITION_DIM>(bc, m->triangleBoundaryConditions);
 
 				break;
 			case MMC_QUAD:
@@ -181,67 +214,75 @@ void ElementData::updateArrays(int meshId, int elementId)
 				// quadCoords.append(reinterpret_cast<char *>(coords), COORD_SIZE * 4);
 				mmr_fa_node_coor(meshId, faces[i], indices, nullptr);
 
-				mmr_node_coor(meshId, indices[1], coords);
-				m->quadCoords.append(reinterpret_cast<char *>(coords), COORD_SIZE);
-				m->lineCoords.append(reinterpret_cast<char *>(coords), COORD_SIZE);
+				mmr_node_coor(meshId, indices[1], vector3);
+				appendRealVector<COORD_DIM>(vector3, m->quadCoords);
+				appendRealVector<COORD_DIM>(vector3, m->lineCoords);
 
-				mmr_node_coor(meshId, indices[2], coords);
-				m->quadCoords.append(reinterpret_cast<char *>(coords), COORD_SIZE);
-				m->lineCoords.append(reinterpret_cast<char *>(coords), COORD_SIZE);
+				mmr_node_coor(meshId, indices[2], vector3);
+				appendRealVector<COORD_DIM>(vector3, m->quadCoords);
+				appendRealVector<COORD_DIM>(vector3, m->lineCoords);
 
-				m->lineCoords.append(reinterpret_cast<char *>(coords), COORD_SIZE);
-				mmr_node_coor(meshId, indices[3], coords);
-				m->quadCoords.append(reinterpret_cast<char *>(coords), COORD_SIZE);
-				m->lineCoords.append(reinterpret_cast<char *>(coords), COORD_SIZE);
+				appendRealVector<COORD_DIM>(vector3, m->lineCoords);
+				mmr_node_coor(meshId, indices[3], vector3);
+				appendRealVector<COORD_DIM>(vector3, m->quadCoords);
+				appendRealVector<COORD_DIM>(vector3, m->lineCoords);
 
-				m->lineCoords.append(reinterpret_cast<char *>(coords), COORD_SIZE);
-				mmr_node_coor(meshId, indices[4], coords);
-				m->quadCoords.append(reinterpret_cast<char *>(coords), COORD_SIZE);
-				m->lineCoords.append(reinterpret_cast<char *>(coords), COORD_SIZE);
+				appendRealVector<COORD_DIM>(vector3, m->lineCoords);
+				mmr_node_coor(meshId, indices[4], vector3);
+				appendRealVector<COORD_DIM>(vector3, m->quadCoords);
+				appendRealVector<COORD_DIM>(vector3, m->lineCoords);
 
-				m->lineCoords.append(reinterpret_cast<char *>(coords), COORD_SIZE);
-				mmr_node_coor(meshId, indices[1], coords);
-				m->lineCoords.append(reinterpret_cast<char *>(coords), COORD_SIZE);
+				appendRealVector<COORD_DIM>(vector3, m->lineCoords);
+				mmr_node_coor(meshId, indices[1], vector3);
+				appendRealVector<COORD_DIM>(vector3, m->lineCoords);
 				//</ModFEM.Mesh-1.workaround>
 
-				m->quadIndices.append(reinterpret_cast<char *>(indices + 1), INDEX_SIZE * 4);	// First element contains amount of coordinates.
+				appendRealVector<INDEX_DIM * 4>(indices + 1, m->quadIndices);	// First element contains amount of coordinates.
 
 				// Append normal to each vertex.
-				mmr_fa_area(meshId, faces[i], & area, normal);
+				mmr_fa_area(meshId, faces[i], & area, vector3);
 				for (int i = 0; i < 4; i++)
-					m->quadNormals.append(reinterpret_cast<char *>(normal), NORMAL_SIZE);
+					appendRealVector<NORMAL_DIM>(vector3, m->quadNormals);
+
+				bc = mmr_fa_bc(meshId, faces[i]);
+				for (int i = 0; i < 4; i++)
+					appendScalar<BOUNDARY_CONDITION_DIM>(bc, m->quadBoundaryConditions);
 
 
 				// Tessellation of quads due to lack of GL_QUADS in modern OpenGL.
 
-				mmr_node_coor(meshId, indices[1], coords);
-				m->quadTriangleCoords.append(reinterpret_cast<char *>(coords), COORD_SIZE);
-				m->quadTriangleIndices.append(reinterpret_cast<char *>(indices + 1), INDEX_SIZE);
+				mmr_node_coor(meshId, indices[1], vector3);
+				appendRealVector<COORD_DIM>(vector3, m->quadTriangleCoords);
+				appendRealVector<INDEX_DIM>(indices + 1, m->quadTriangleIndices);
 
-				mmr_node_coor(meshId, indices[2], coords);
-				m->quadTriangleCoords.append(reinterpret_cast<char *>(coords), COORD_SIZE);
-				m->quadTriangleIndices.append(reinterpret_cast<char *>(indices + 2), INDEX_SIZE);
+				mmr_node_coor(meshId, indices[2], vector3);
+				appendRealVector<COORD_DIM>(vector3, m->quadTriangleCoords);
+				appendRealVector<INDEX_DIM>(indices + 2, m->quadTriangleIndices);
 
-				mmr_node_coor(meshId, indices[3], coords);
-				m->quadTriangleCoords.append(reinterpret_cast<char *>(coords), COORD_SIZE);
-				m->quadTriangleIndices.append(reinterpret_cast<char *>(indices + 3), INDEX_SIZE);
+				mmr_node_coor(meshId, indices[3], vector3);
+				appendRealVector<COORD_DIM>(vector3, m->quadTriangleCoords);
+				appendRealVector<INDEX_DIM>(indices + 3, m->quadTriangleIndices);
 
-				mmr_node_coor(meshId, indices[4], coords);
-				m->quadTriangleCoords.append(reinterpret_cast<char *>(coords), COORD_SIZE);
-				m->quadTriangleIndices.append(reinterpret_cast<char *>(indices + 4), INDEX_SIZE);
+				mmr_node_coor(meshId, indices[4], vector3);
+				appendRealVector<COORD_DIM>(vector3, m->quadTriangleCoords);
+				appendRealVector<INDEX_DIM>(indices + 4, m->quadTriangleIndices);
 
-				mmr_node_coor(meshId, indices[3], coords);
-				m->quadTriangleCoords.append(reinterpret_cast<char *>(coords), COORD_SIZE);
-				m->quadTriangleIndices.append(reinterpret_cast<char *>(indices + 3), INDEX_SIZE);
+				mmr_node_coor(meshId, indices[3], vector3);
+				appendRealVector<COORD_DIM>(vector3, m->quadTriangleCoords);
+				appendRealVector<INDEX_DIM>(indices + 3, m->quadTriangleIndices);
 
-				mmr_node_coor(meshId, indices[1], coords);
-				m->quadTriangleCoords.append(reinterpret_cast<char *>(coords), COORD_SIZE);
-				m->quadTriangleIndices.append(reinterpret_cast<char *>(indices + 1), INDEX_SIZE);
+				mmr_node_coor(meshId, indices[1], vector3);
+				appendRealVector<COORD_DIM>(vector3, m->quadTriangleCoords);
+				appendRealVector<INDEX_DIM>(indices + 1, m->quadTriangleIndices);
 
 				// Append normal to each vertex.
-				mmr_fa_area(meshId, faces[i], & area, normal);
+				mmr_fa_area(meshId, faces[i], & area, vector3);
 				for (int i = 0; i < 6; i++)
-					m->quadTriangleNormals.append(reinterpret_cast<char *>(normal), NORMAL_SIZE);
+					appendRealVector<NORMAL_DIM>(vector3, m->quadTriangleNormals);
+
+				bc = mmr_fa_bc(meshId, faces[i]);
+				for (int i = 0; i < 6; i++)
+					appendScalar<BOUNDARY_CONDITION_DIM>(bc, m->quadTriangleBoundaryConditions);
 
 				break;
 			default:
@@ -253,18 +294,21 @@ void ElementData::updateArrays(int meshId, int elementId)
 void ElementData::updateProperties()
 {
 	m->triangles["coords"] = m->triangleCoords;
-	m->triangles["count"] = m->triangleCoords.count() / (COORD_SIZE * 3);
+	m->triangles["count"] = m->triangleCoords.count() / (static_cast<int>(COORD_SIZE) * 3);
 	m->triangles["normals"] = m->triangleNormals;
+	m->triangles["boundaryConditions"] = m->triangleBoundaryConditions;
 	m->quads["coords"] = m->quadCoords;
-	m->quads["count"] = m->quadCoords.count() / (COORD_SIZE * 4);
+	m->quads["count"] = m->quadCoords.count() / (static_cast<int>(COORD_SIZE) * 4);
 	m->quads["normals"] = m->quadNormals;
+	m->quads["boundaryConditions"] = m->quadBoundaryConditions;
 	m->quads["triangleCoords"] = m->quadTriangleCoords;
-	m->quads["triangleCount"] = m->quadTriangleCoords.count() / (COORD_SIZE * 3);
+	m->quads["triangleCount"] = m->quadTriangleCoords.count() / (static_cast<int>(COORD_SIZE) * 3);
 	m->quads["triangleNormals"] = m->quadTriangleNormals;
+	m->quads["triangleBoundaryConditions"] = m->quadTriangleBoundaryConditions;
 	m->lines["coords"] = m->lineCoords;
-	m->lines["count"] = m->lineCoords.count() / (COORD_SIZE * 2);
+	m->lines["count"] = m->lineCoords.count() / (static_cast<int>(COORD_SIZE) * 2);
 	m->nodes["coords"] = m->nodeCoords;
-	m->nodes["count"] = m->nodeCoords.count() / (COORD_SIZE);
+	m->nodes["count"] = m->nodeCoords.count() / static_cast<int>(COORD_SIZE);
 
 	emit trianglesChanged();
 	emit quadsChanged();

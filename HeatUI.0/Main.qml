@@ -56,9 +56,13 @@ Item {
 
 					SpinBox {
 						enabled: elementSelectionSingleButton.checked
+
 						from: 1
 						to: heatProblem.elementData.count.elements
 
+						onEnabledChanged: enabled ? heatProblem.elementData.selectElement(value) : heatProblem.elementData.selectAll()
+
+						onValueChanged: if (enabled) heatProblem.elementData.selectElement(value)
 					}
 				}
 			}

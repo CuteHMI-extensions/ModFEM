@@ -2,6 +2,7 @@
 
 #include <modfem/heat/Problem.hpp>
 #include <modfem/heat/ElementData.hpp>
+#include <modfem/heat/VertexColorMapper.hpp>
 
 #include <QtQml>
 
@@ -14,6 +15,7 @@ void QMLPlugin::registerTypes(const char * uri)
 	Q_ASSERT(uri == QLatin1String("ModFEM.Heat"));
 
 	qmlRegisterType<modfem::heat::Problem>(uri, MODFEM_HEAT_MAJOR, 0, "Problem");
+	qmlRegisterType<modfem::heat::VertexColorMapper>(uri, MODFEM_HEAT_MAJOR, 0, "VertexColorMapper");
 	qmlRegisterUncreatableType<modfem::heat::ElementData>(uri, MODFEM_HEAT_MAJOR, 0, "ElementData", "Class 'modfem::heat::ElementData' can not be instantiated from QML");
 }
 
