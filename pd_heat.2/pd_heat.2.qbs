@@ -8,6 +8,8 @@ Project {
 	cutehmi.CppExtension {
 		name: parent.name
 
+		type: ["staticlibrary"]
+
 		minor: 0
 
 		micro: 0

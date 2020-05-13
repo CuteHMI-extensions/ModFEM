@@ -129,6 +129,20 @@ Entity {
 
 	CustomMaterial {
 		id: customMaterial
+
+		texture: TextureLoader {
+			source: "awesomeface.png"
+			mirrored: true
+		}
+	}
+
+	TextureMaterial {
+		id: texMaterial
+
+		texture: TextureLoader {
+			source: "man.png"
+			mirrored: true
+		}
 	}
 
 	PhongMaterial {
@@ -142,6 +156,15 @@ Entity {
 		id: sphereMesh
 	}
 
+	Transform {
+		id: transform
+		translation: Qt.vector3d( -2, 0, -30)
+//						translation: Qt.vector3d( 0, 0, -5)
+//						scale3D: Qt.vector3d(1000, 1000, 100)
+//						rotation: fromAxisAndAngle(Qt.vector3d(1, 0, 0), 90)
+//						rotationX: 90
+	}
+
 //	components: [geometry, material]
-	components: [sphereMesh, customMaterial]
+	components: [sphereMesh, customMaterial, transform]
 }

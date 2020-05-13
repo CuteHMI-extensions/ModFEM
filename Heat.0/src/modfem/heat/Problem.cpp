@@ -3,6 +3,8 @@
 #include <QSettings>
 #include <QDir>
 #include <QDataStream>
+#include <QFuture>
+#include <QtConcurrent>
 
 #include <cstdlib>
 #include <iostream>
@@ -100,13 +102,13 @@ Problem::Problem(QObject * parent):
 					new ElementData(this)})
 {
 	QSettings settings;
-	setDirectory(settings.value("ModFEM/QtHeat.0/directory", ".").toString());
+	setDirectory(settings.value("ModFEM/Heat.0/directory", ".").toString());
 }
 
 Problem::~Problem()
 {
 	QSettings settings;
-	settings.setValue("ModFEM/QtHeat.0/directory", directory());
+	settings.setValue("ModFEM/Heat.0/directory", directory());
 }
 
 QString Problem::directory() const
@@ -332,22 +334,28 @@ void Problem::solve()
 void Problem::integrate()
 {
 	QDir problemDir(directory());
-	FILE * interactiveInput = stdin;
-	FILE * interactiveOutput = stdout;
-
-	utv_SIGINT_not_caught = 1;
-
-	printf("\nBeginning time integration of heat problem\n\n");
-
-	double timer_all = time_clock();
 
 	/*---------- main time integration procedure ------------*/
-	pdr_heat_time_integration(problemDir.path().toLocal8Bit().data(), interactiveInput, interactiveOutput);
-	std::cout.flush();
+//	QtConcurrent::run(pdr_heat_time_integration, problemDir.path().toLocal8Bit().data(), interactiveInput, interactiveOutput);
+//	pdr_heat_time_integration(problemDir.path().toLocal8Bit().data(), interactiveInput, interactiveOutput);
+//	std::cout.flush();
+	QtConcurrent::run([ = ]() {
+		FILE * interactiveInput = stdin;
+		FILE * interactiveOutput = stdout;
 
-	timer_all = time_clock() - timer_all;
+		utv_SIGINT_not_caught = 1;
 
-	printf("\nExecution time total: %lf\n", timer_all);
+		printf("\nBeginning time integration of heat problem\n\n");
+
+		double timer_all = time_clock();
+
+		pdr_heat_time_integration(problemDir.path().toLocal8Bit().data(), interactiveInput, interactiveOutput);
+		std::cout.flush();
+
+		timer_all = time_clock() - timer_all;
+
+		printf("\nExecution time total: %lf\n", timer_all);
+	});
 }
 
 void Problem::writeParaview()

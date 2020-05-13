@@ -3,7 +3,7 @@ import qbs
 import cutehmi
 
 Project {
-	name: "ModFEM.Heat.0"
+	name: "ModFEM.NSSUPGHeat.0"
 
 	cutehmi.CppExtension {
 		name: parent.name
@@ -17,21 +17,23 @@ Project {
 		description: "Heat user interface."
 
 		files: [
-         "include/modfem/heat/BoundaryConditionsData.hpp",
-         "include/modfem/heat/ElementData.hpp",
-         "include/modfem/heat/Problem.hpp",
-         "include/modfem/heat/VertexColorMapper.hpp",
-         "include/modfem/heat/internal/common.hpp",
-         "include/modfem/heat/internal/platform.hpp",
-         "include/modfem/heat/logging.hpp",
-         "include/modfem/heat/metadata.hpp",
-         "src/modfem/heat/BoundaryConditionsData.cpp",
-         "src/modfem/heat/ElementData.cpp",
-         "src/modfem/heat/Problem.cpp",
-         "src/modfem/heat/VertexColorMapper.cpp",
-         "src/modfem/heat/internal/QMLPlugin.cpp",
-         "src/modfem/heat/internal/QMLPlugin.hpp",
-         "src/modfem/heat/logging.cpp",
+         "include/modfem/nssupgheat/BoundaryConditionsData.hpp",
+         "include/modfem/nssupgheat/ElementData.hpp",
+         "include/modfem/nssupgheat/Problem.hpp",
+         "include/modfem/nssupgheat/ScalarFieldNodes.hpp",
+         "include/modfem/nssupgheat/VertexColorMapper.hpp",
+         "include/modfem/nssupgheat/internal/common.hpp",
+         "include/modfem/nssupgheat/internal/platform.hpp",
+         "include/modfem/nssupgheat/logging.hpp",
+         "include/modfem/nssupgheat/metadata.hpp",
+         "src/modfem/nssupgheat/BoundaryConditionsData.cpp",
+         "src/modfem/nssupgheat/ElementData.cpp",
+         "src/modfem/nssupgheat/Problem.cpp",
+         "src/modfem/nssupgheat/ScalarFieldNodes.cpp",
+         "src/modfem/nssupgheat/VertexColorMapper.cpp",
+         "src/modfem/nssupgheat/internal/QMLPlugin.cpp",
+         "src/modfem/nssupgheat/internal/QMLPlugin.hpp",
+         "src/modfem/nssupgheat/logging.cpp",
      ]
 
 		Depends { name: "Qt.3drender" }
@@ -53,12 +55,20 @@ Project {
 
 		Depends { name: "modfem.config" }
 
-		Depends { name: "ModFEM.pd_heat.2" }
+		Depends { name: "ModFEM.pd_ns_supg_heat.2" }
+
+		Depends { name: "ModFEM.pd_ns_supg.2"; cpp.link: false }
+
+		Depends { name: "ModFEM.pd_heat.2"; cpp.link: false }
 
 		Export {
 			Depends { name: "CuteHMI.2" }
 
-			Depends { name: "ModFEM.pd_heat.2" }
+			Depends { name: "ModFEM.pd_ns_supg_heat.2" }
+
+			Depends { name: "ModFEM.pd_ns_supg.2"; cpp.link: false }
+
+			Depends { name: "ModFEM.pd_heat.2"; cpp.link: false }
 		}
 	}
 }

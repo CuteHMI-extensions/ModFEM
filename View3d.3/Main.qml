@@ -67,13 +67,22 @@ Item {
 //						alpha: 0.1
 //					}
 
+					Transform {
+						id: logoTransform
+//						translation: Qt.vector3d( -25, 0, -100)
+						translation: Qt.vector3d( 0, 0, -10)
+//						scale3D: Qt.vector3d(1000, 1000, 100)
+//						rotation: fromAxisAndAngle(Qt.vector3d(1, 0, 0), 90)
+//						rotationX: 90
+					}
+
 					PhongMaterial {
 						id: logoMaterial
-						ambient: Qt.rgba( 0.1, 0.1, 0.1, 1.0 )
+						ambient: Qt.rgba( 1.0, 0.1, 0.1, 1.0 )
 						shininess: 1.0
 					}
 
-					components: [ logoMesh, logoMaterial ]
+					components: [ logoMesh, logoMaterial, logoTransform ]
 				}
 
 				Entity {
@@ -81,17 +90,20 @@ Item {
 
 					Transform {
 						id: planeTransform
-						translation: Qt.vector3d( -25, 0, -100)
+//						translation: Qt.vector3d( -25, 0, -50)
+						translation: Qt.vector3d( 0, 0, -5)
 //						scale3D: Qt.vector3d(1000, 1000, 100)
-						rotation: fromAxisAndAngle(Qt.vector3d(1,0,0), -90)
+//						rotation: fromAxisAndAngle(Qt.vector3d(1, 0, 0), 90)
+						rotationX: 90
 					}
 
 					PlaneMesh {
 						id: planeMesh
 
-						width: 10
-						height: 10
-						meshResolution: Qt.size(20, 20)
+						width: 2
+						height: 2
+						mirrored: true
+						meshResolution: Qt.size(5, 5)
 					}
 
 					PhongMaterial {
@@ -103,6 +115,7 @@ Item {
 
 					TextureMaterial {
 						id: planeMaterial
+
 //						texture: plane2dTexture
 						alphaBlending: true
 						texture: TextureLoader {
@@ -130,7 +143,8 @@ Item {
 
 							TextureImage {
 								mipLevel: 0
-								source: Qt.resolvedUrl("man.png")
+//								source: Qt.resolvedUrl("man.png")
+								source: Qt.resolvedUrl("awesomeface.png")
 							}
 						}
 

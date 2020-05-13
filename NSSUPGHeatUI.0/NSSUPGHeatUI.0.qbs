@@ -3,12 +3,14 @@ import qbs
 import cutehmi
 
 Project {
-	name: "ModFEM.Heat.0"
+	name: "ModFEM.NSSUPGHeatUI.0"
 
-	cutehmi.CppExtension {
+	//	condition: false
+
+	cutehmi.Extension {
 		name: parent.name
 
-		friendlyName: "Heat Qt interface"
+		friendlyName: "Heat User Interface"
 
 		vendor: "ModFEM"
 
@@ -17,26 +19,14 @@ Project {
 		description: "Heat user interface."
 
 		files: [
-         "include/modfem/heat/BoundaryConditionsData.hpp",
-         "include/modfem/heat/ElementData.hpp",
-         "include/modfem/heat/Problem.hpp",
-         "include/modfem/heat/VertexColorMapper.hpp",
-         "include/modfem/heat/internal/common.hpp",
-         "include/modfem/heat/internal/platform.hpp",
-         "include/modfem/heat/logging.hpp",
-         "include/modfem/heat/metadata.hpp",
-         "src/modfem/heat/BoundaryConditionsData.cpp",
-         "src/modfem/heat/ElementData.cpp",
-         "src/modfem/heat/Problem.cpp",
-         "src/modfem/heat/VertexColorMapper.cpp",
-         "src/modfem/heat/internal/QMLPlugin.cpp",
-         "src/modfem/heat/internal/QMLPlugin.hpp",
-         "src/modfem/heat/logging.cpp",
+         "ElementsEntity.qml",
+         "Main.qml",
+         "MeshInfo.qml",
+         "ProblemInfo.qml",
+         "Scene3D.qml",
+		 "SurfaceEntity.qml",
+         "TestEntity.qml",
      ]
-
-		Depends { name: "Qt.3drender" }
-
-		Depends { name: "Qt.concurrent" }
 
 		Depends { name: "CuteHMI.2" }
 
@@ -51,15 +41,32 @@ Project {
 
 		Depends { name: "cutehmi.qmltypes" }
 
-		Depends { name: "modfem.config" }
-
-		Depends { name: "ModFEM.pd_heat.2" }
-
 		Export {
 			Depends { name: "CuteHMI.2" }
-
-			Depends { name: "ModFEM.pd_heat.2" }
 		}
+
+//		FileTagger {
+//			patterns: "*.fbx"
+//			fileTags: ["fbx"]
+//		}
+
+//		FileTagger {
+//			patterns: "*.obj"
+//			fileTags: ["obj"]
+//		}
+
+//		FileTagger {
+//			patterns: "*.png"
+//			fileTags: ["png"]
+//		}
+
+//		Group {
+//			name: "3D assets"
+//			fileTagsFilter: ["fbx", "obj", "png"]
+//			qbs.install: true
+//			qbs.installSourceBase: installSourceBase
+//			qbs.installDir: dedicatedInstallSubdir
+//		}
 	}
 }
 

@@ -41,14 +41,33 @@ Material {
 			// OpenGL 3.1
 			Technique {
 				filterKeys: [forward]
+
 				graphicsApiFilter {
 					api: GraphicsApiFilter.OpenGL
 					profile: GraphicsApiFilter.CoreProfile
 					majorVersion: 3
 					minorVersion: 1
 				}
+
 				renderPasses: RenderPass {
-					renderStates: CullFace { mode: CullFace.NoCulling }
+					renderStates: [
+						CullFace {
+							mode: CullFace.Back
+						},
+						DepthTest {
+							depthFunction: DepthTest.Less
+						},
+						BlendEquationArguments {
+							sourceRgb: BlendEquationArguments.SourceAlpha
+							sourceAlpha: BlendEquationArguments.SourceAlpha
+							destinationRgb: BlendEquationArguments.OneMinusSourceAlpha
+							destinationAlpha: BlendEquationArguments.OneMinusSourceAlpha
+						},
+						BlendEquation {
+							blendFunction: BlendEquation.Add
+						}
+					]
+
 					shaderProgram: gl3Shader
 				}
 			},
@@ -56,14 +75,33 @@ Material {
 			// OpenGL 2.0
 			Technique {
 				filterKeys: [forward]
+
 				graphicsApiFilter {
 					api: GraphicsApiFilter.OpenGL
 					profile: GraphicsApiFilter.NoProfile
 					majorVersion: 2
 					minorVersion: 0
 				}
+
 				renderPasses: RenderPass {
-					renderStates: CullFace { mode: CullFace.NoCulling }
+					renderStates: [
+						CullFace {
+							mode: CullFace.Back
+						},
+						DepthTest {
+							depthFunction: DepthTest.Less
+						},
+						NoDepthMask {},
+						BlendEquationArguments {
+							sourceRgb: BlendEquationArguments.SourceAlpha
+							sourceAlpha: BlendEquationArguments.SourceAlpha
+							destinationRgb: BlendEquationArguments.OneMinusSourceAlpha
+							destinationAlpha: BlendEquationArguments.OneMinusSourceAlpha
+						},
+						BlendEquation {
+							blendFunction: BlendEquation.Add
+						}
+					]
 					shaderProgram: es2Shader
 				}
 			},
@@ -71,14 +109,32 @@ Material {
 			// ES 2.0
 			Technique {
 				filterKeys: [forward]
+
 				graphicsApiFilter {
 					api: GraphicsApiFilter.OpenGLES
 					profile: GraphicsApiFilter.CoreProfile
 					majorVersion: 2
 					minorVersion: 0
 				}
+
 				renderPasses: RenderPass {
-					renderStates: CullFace { mode: CullFace.NoCulling }
+					renderStates: [
+						CullFace {
+							mode: CullFace.Back
+						},
+						DepthTest {
+							depthFunction: DepthTest.Less
+						},
+						BlendEquationArguments {
+							sourceRgb: BlendEquationArguments.SourceAlpha
+							sourceAlpha: BlendEquationArguments.SourceAlpha
+							destinationRgb: BlendEquationArguments.OneMinusSourceAlpha
+							destinationAlpha: BlendEquationArguments.OneMinusSourceAlpha
+						},
+						BlendEquation {
+							blendFunction: BlendEquation.Add
+						}
+					]
 					shaderProgram: es2Shader
 				}
 			}
