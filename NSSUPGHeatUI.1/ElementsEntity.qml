@@ -3,7 +3,7 @@ import Qt3D.Core 2.5
 import Qt3D.Render 2.14
 import Qt3D.Extras 2.5
 
-import ModFEM.NSSUPGHeat 0.0 as NSSUPGHeat
+import ModFEM.NSSUPGHeat 1.0 as NSSUPGHeat
 
 Entity {
 	id: root

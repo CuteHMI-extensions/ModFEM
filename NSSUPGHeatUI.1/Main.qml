@@ -10,7 +10,7 @@ import Qt3D.Extras 2.14
 import Qt.labs.platform 1.1
 import Qt.labs.settings 1.1
 
-import ModFEM.NSSUPGHeat 0.0
+import ModFEM.NSSUPGHeat 1.0
 
 Item {
 	anchors.fill: parent
@@ -192,6 +192,18 @@ Item {
 					text: qsTr("Init")
 
 					onClicked: problem.init()
+				}
+
+				Button {
+					text: qsTr("Start")
+
+					onClicked: problem.start()
+				}
+
+				Button {
+					text: qsTr("Stop")
+
+					onClicked: problem.stop()
 				}
 
 				Button {

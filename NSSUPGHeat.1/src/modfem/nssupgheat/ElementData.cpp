@@ -38,6 +38,7 @@ ElementData::ElementData(QObject * parent):
 	{},
 	{},
 	{},
+	{},
 	{}})
 {
 	m->count["elements"] = 0;

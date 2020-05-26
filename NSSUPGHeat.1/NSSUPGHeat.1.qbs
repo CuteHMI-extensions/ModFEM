@@ -3,7 +3,7 @@ import qbs
 import cutehmi
 
 Project {
-	name: "ModFEM.NSSUPGHeat.0"
+	name: "ModFEM.NSSUPGHeat.1"
 
 	cutehmi.CppExtension {
 		name: parent.name
@@ -19,6 +19,7 @@ Project {
 		files: [
          "include/modfem/nssupgheat/BoundaryConditionsData.hpp",
          "include/modfem/nssupgheat/ElementData.hpp",
+         "include/modfem/nssupgheat/IntegrationThread.hpp",
          "include/modfem/nssupgheat/Problem.hpp",
          "include/modfem/nssupgheat/ScalarFieldNodes.hpp",
          "include/modfem/nssupgheat/HueColorMapper.hpp",
@@ -29,7 +30,8 @@ Project {
          "include/modfem/nssupgheat/metadata.hpp",
          "src/modfem/nssupgheat/BoundaryConditionsData.cpp",
          "src/modfem/nssupgheat/ElementData.cpp",
-         "src/modfem/nssupgheat/HueColorMapper.cpp",
+		 "src/modfem/nssupgheat/HueColorMapper.cpp",
+         "src/modfem/nssupgheat/IntegrationThread.cpp",
          "src/modfem/nssupgheat/Problem.cpp",
          "src/modfem/nssupgheat/ScalarFieldNodes.cpp",
          "src/modfem/nssupgheat/HueColorMapper.cpp",

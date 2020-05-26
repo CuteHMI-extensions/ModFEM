@@ -1095,7 +1095,6 @@ int pdr_ns_supg_heat_init(
 
 
   utr_mesh_insert_new_bcnums(Work_dir,mesh_id);
-  fprintf(stdout, "DADAa4\n");
 
   utr_bc_to_insert_completed();
 

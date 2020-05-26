@@ -249,6 +249,9 @@ void Problem::init()
 
 		m->elementData->init(meshId());
 	}
+
+	pdv_ns_supg_problem.time.final_step = 1;	// TEMP force single step
+	solve();	//temp
 }
 
 void Problem::solve()
@@ -275,6 +278,7 @@ void Problem::solve()
 			apr_get_nreq(pdv_ns_supg_problem.ctrl.field_id)
 			+ apr_get_nreq(pdv_heat_problem.ctrl.field_id),
 			"control_points.csv");
+
 	utr_io_result_write_columns(pdv_ns_supg_problem.time.cur_step);
 	char mm_name[255] = {0};
 	mmr_module_introduce(mm_name);
@@ -301,6 +305,8 @@ void Problem::solve()
 	timer_all = time_clock() - timer_all;
 
 	fprintf(m->interactiveOutput, "\nExecution time total: %lf\n", timer_all);
+
+	pdv_ns_supg_problem.time.final_step++;	// TEMP force single step
 }
 
 void Problem::integrate()
