@@ -1,3 +1,4 @@
+import QtQml 2.12
 import QtQuick 2.0
 import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.3
@@ -18,6 +19,20 @@ Item {
 
 	Problem {
 		id: problem
+	}
+
+	Instantiator {
+		id: colorMappersInstantiator
+
+		property AbstractColorMapper triangleColorMapper
+
+		property AbstractColorMapper quadTriangleColorMapper
+
+		onObjectAdded: {
+			object.elementData = Qt.binding(function() { return problem.elementData })
+			triangleColorMapper = object.triangle
+			quadTriangleColorMapper = object.quadTriangle
+		}
 	}
 
 	RowLayout {
@@ -126,8 +141,27 @@ Item {
 			//			}
 
 
+
 			GridLayout {
 				columns: 2
+
+				Label {
+					text: qsTr("Color:")
+				}
+
+				ComboBox {
+					model: [qsTr("BC"), qsTr("Temperature")]
+
+					onCurrentIndexChanged: {
+						switch (currentIndex) {
+							case 0:
+								colorMappersInstantiator.delegate = Qt.createComponent("BCColorMappers.qml")
+								break
+							case 1:
+								colorMappersInstantiator.delegate = Qt.createComponent("TemperatureColorMappers.qml")
+						}
+					}
+				}
 
 				Label {
 					text: qsTr("Point size:")
@@ -326,6 +360,8 @@ Item {
 
 						ElementsEntity {
 							elementData: problem.elementData
+							triangleColorMapper: colorMappersInstantiator.triangleColorMapper
+							quadTriangleColorMapper: colorMappersInstantiator.quadTriangleColorMapper
 
 							rotationX: rotationXSlider.value
 							rotationY: rotationYSlider.value
@@ -336,19 +372,6 @@ Item {
 							linesEnabled: linesCheckbox.checked
 							facesEnabled: facesCheckbox.checked
 						}
-
-						//						SurfaceEntity {
-						//							surface: problem.faces
-
-						//							rotationX: rotationXSlider.value
-						//							rotationY: rotationYSlider.value
-						//							rotationZ: rotationZSlider.value
-						//							scale: Math.pow(10, scaleSlider.value)
-
-						//							nodesEnabled: surfaceNodesCheckbox.checked
-						//							linesEnabled: surfaceLinesCheckbox.checked
-						//							facesEnabled: surfaceFacesCheckbox.checked
-						//						}
 					}
 				}
 

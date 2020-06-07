@@ -3,60 +3,29 @@
 namespace modfem {
 namespace nssupgheat {
 
-constexpr HueColorMapper::InputType HueColorMapper::INITIAL_INPUT_TYPE;
 constexpr qreal HueColorMapper::INITIAL_HUE_BEGIN;
 constexpr qreal HueColorMapper::INITIAL_HUE_END;
 constexpr qreal HueColorMapper::INITIAL_SATURATION;
 constexpr qreal HueColorMapper::INITIAL_LIGHTNESS;
 
 HueColorMapper::HueColorMapper(QObject * parent):
-	QObject(parent),
+	AbstractColorMapper(parent),
 	m(new Members{
-	INITIAL_INPUT_TYPE,
 	INITIAL_SATURATION,
 	INITIAL_LIGHTNESS,
 	INITIAL_HUE_BEGIN,
 	INITIAL_HUE_END,
 	0.0,
-	0.0,
-	{},
-	{},
-	0})
+	0.0})
 {
-}
-
-HueColorMapper::InputType HueColorMapper::inputType() const
-{
-	return m->inputType;
-}
-
-void HueColorMapper::setInputType(HueColorMapper::InputType type)
-{
-	if (m->inputType != type) {
-		m->inputType = type;
-		emit inputTypeChanged();
-		updateOutput();
-	}
-}
-
-QByteArray HueColorMapper::input() const
-{
-	return m->input;
-}
-
-void HueColorMapper::setInput(const QByteArray & input)
-{
-	if (m->input.constData() != input.constData()) {
-		m->input = input;
-		emit inputChanged();
-		setCount(m->input.length() / inputTypeSize());
-		updateOutput();
-	}
-}
-
-QByteArray HueColorMapper::output() const
-{
-	return m->output;
+	connect(this, & AbstractColorMapper::inputTypeChanged, this, & HueColorMapper::updateOutput);
+	connect(this, & AbstractColorMapper::inputChanged, this, & HueColorMapper::updateOutput);
+	connect(this, & HueColorMapper::saturationChanged, this, & HueColorMapper::updateOutput);
+	connect(this, & HueColorMapper::lightnessChanged, this, & HueColorMapper::updateOutput);
+	connect(this, & HueColorMapper::hueBeginChanged, this, & HueColorMapper::updateOutput);
+	connect(this, & HueColorMapper::hueEndChanged, this, & HueColorMapper::updateOutput);
+	connect(this, & HueColorMapper::valueBeginChanged, this, & HueColorMapper::updateOutput);
+	connect(this, & HueColorMapper::valueEndChanged, this, & HueColorMapper::updateOutput);
 }
 
 qreal HueColorMapper::saturation() const
@@ -69,7 +38,6 @@ void HueColorMapper::setSaturation(qreal saturation)
 	if (m->saturation != saturation) {
 		m->saturation = saturation;
 		emit saturationChanged();
-		updateOutput();
 	}
 }
 
@@ -83,7 +51,6 @@ void HueColorMapper::setLightness(qreal lightness)
 	if (m->lightness != lightness) {
 		m->lightness = lightness;
 		emit lightnessChanged();
-		updateOutput();
 	}
 }
 
@@ -97,7 +64,6 @@ void HueColorMapper::setHueBegin(qreal fromHue)
 	if (m->hueBegin != fromHue) {
 		m->hueBegin = fromHue;
 		emit hueBeginChanged();
-		updateOutput();
 	}
 }
 
@@ -111,7 +77,6 @@ void HueColorMapper::setHueEnd(qreal toHue)
 	if (m->hueEnd != toHue) {
 		m->hueEnd = toHue;
 		emit hueEndChanged();
-		updateOutput();
 	}
 }
 
@@ -125,7 +90,6 @@ void HueColorMapper::setValueBegin(qreal from)
 	if (m->valueBegin != from) {
 		m->valueBegin = from;
 		emit valueBeginChanged();
-		updateOutput();
 	}
 }
 
@@ -139,52 +103,25 @@ void HueColorMapper::setValueEnd(qreal to)
 	if (m->valueEnd != to) {
 		m->valueEnd = to;
 		emit valueEndChanged();
-		updateOutput();
-	}
-}
-
-int HueColorMapper::count() const
-{
-	return m->count;
-}
-
-void HueColorMapper::setCount(int count)
-{
-	if (m->count != count) {
-		m->count = count;
-		emit countChanged();
 	}
 }
 
 void HueColorMapper::updateOutput()
 {
-	m->output.clear();
-	m->output.reserve(count() * COLOR_VECTOR_SIZE);
+	output().clear();
+	output().reserve(count() * OUTPUT_SIZE);
 	QColor color;
-	QByteArray::const_iterator inputIterator = m->input.constBegin();
-	while ((color = pullColorFromInput(inputIterator, m->input.constEnd())).isValid()) {
+	QByteArray::const_iterator inputIterator = input().constBegin();
+	while ((color = pullColorFromInput(inputIterator, input().constEnd())).isValid()) {
 		float colorVector[3];
 //		color = QColor::fromRgb(0, 120, 233);	//TEMP
 //		CUTEHMI_DEBUG("color; " << color);
 		colorVector[0] = color.redF();
 		colorVector[1] = color.greenF();
 		colorVector[2] = color.blueF();
-		m->output.append(reinterpret_cast<char *>(colorVector), COLOR_VECTOR_SIZE);
+		output().append(reinterpret_cast<char *>(colorVector), OUTPUT_SIZE);
 	}
 	emit outputChanged();
-}
-
-std::size_t HueColorMapper::inputTypeSize() const
-{
-	switch (m->inputType) {
-		case INPUT_FLOAT:
-			return sizeof(float);
-		case INPUT_DOUBLE:
-			return sizeof(double);
-		default:
-			CUTEHMI_CRITICAL("Unrecognized input type '" << m->inputType << "'.");
-	}
-	return sizeof(float);
 }
 
 QColor HueColorMapper::pullColorFromInput(QByteArray::const_iterator & pos, QByteArray::const_iterator end)
@@ -192,7 +129,7 @@ QColor HueColorMapper::pullColorFromInput(QByteArray::const_iterator & pos, QByt
 	qreal value;
 
 	if (pos != end) {
-		switch (m->inputType) {
+		switch (inputType()) {
 			case INPUT_FLOAT: {
 				value = *reinterpret_cast<const float *>(pos);
 				pos += sizeof(float);
@@ -203,13 +140,18 @@ QColor HueColorMapper::pullColorFromInput(QByteArray::const_iterator & pos, QByt
 				pos += sizeof(double);
 				break;
 			}
+			case INPUT_INT: {
+				value = *reinterpret_cast<const int *>(pos);
+				pos += sizeof(int);
+				break;
+			}
 			default:
-				CUTEHMI_CRITICAL("Unrecognized input type '" << m->inputType << "'.");
+				CUTEHMI_CRITICAL("Unrecognized input type '" << inputType() << "'.");
 				return QColor();
 		}
 		qreal valuePercent = (value - m->valueBegin) / (m->valueEnd - m->valueBegin);
 		qreal hue = m->hueBegin + valuePercent * (m->hueEnd - m->hueBegin);
-		CUTEHMI_DEBUG("Mapping value " << value << " value percentage: " << valuePercent << " to hue: " << hue);
+//		CUTEHMI_DEBUG("Mapping value " << value << " value percentage: " << valuePercent << " to hue: " << hue);
 		return QColor::fromHslF(qMax(hueBegin(), qMin(hue, hueEnd())), saturation(), lightness());
 	}
 	return QColor();

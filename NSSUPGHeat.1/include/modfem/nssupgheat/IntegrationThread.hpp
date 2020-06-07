@@ -18,6 +18,9 @@ class MODFEM_NSSUPGHEAT_API IntegrationThread:
 
 		void run() override;
 
+	signals:
+		void iterationFinished();
+
 	private:
 		void integrate();
 

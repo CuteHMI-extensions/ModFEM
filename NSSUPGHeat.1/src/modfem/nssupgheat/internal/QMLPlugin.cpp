@@ -4,7 +4,8 @@
 
 #include <modfem/nssupgheat/Problem.hpp>
 #include <modfem/nssupgheat/ElementData.hpp>
-#include <modfem/nssupgheat/VertexColorMapper.hpp>
+#include <modfem/nssupgheat/AbstractColorMapper.hpp>
+#include <modfem/nssupgheat/PaletteColorMapper.hpp>
 #include <modfem/nssupgheat/HueColorMapper.hpp>
 #include <modfem/nssupgheat/ScalarFieldNodes.hpp>
 
@@ -19,7 +20,8 @@ void QMLPlugin::registerTypes(const char * uri)
 	Q_ASSERT(uri == QLatin1String("ModFEM.NSSUPGHeat"));
 
 	qmlRegisterType<modfem::nssupgheat::Problem>(uri, MODFEM_NSSUPGHEAT_MAJOR, 0, "Problem");
-	qmlRegisterType<modfem::nssupgheat::VertexColorMapper>(uri, MODFEM_NSSUPGHEAT_MAJOR, 0, "VertexColorMapper");
+	qmlRegisterType<modfem::nssupgheat::PaletteColorMapper>(uri, MODFEM_NSSUPGHEAT_MAJOR, 0, "PaletteColorMapper");
+	qmlRegisterUncreatableType<modfem::nssupgheat::AbstractColorMapper>(uri, MODFEM_NSSUPGHEAT_MAJOR, 0, "AbstractColorMapper", "Class 'modfem::heat::AbstractColorMapper' can not be instantiated from QML");
 	qmlRegisterType<modfem::nssupgheat::HueColorMapper>(uri, MODFEM_NSSUPGHEAT_MAJOR, 0, "HueColorMapper");
 	qmlRegisterType<modfem::nssupgheat::ScalarFieldNodes>(uri, MODFEM_NSSUPGHEAT_MAJOR, 0, "ScalarFieldNodes");
 	qmlRegisterUncreatableType<modfem::nssupgheat::ElementData>(uri, MODFEM_NSSUPGHEAT_MAJOR, 0, "ElementData", "Class 'modfem::heat::ElementData' can not be instantiated from QML");

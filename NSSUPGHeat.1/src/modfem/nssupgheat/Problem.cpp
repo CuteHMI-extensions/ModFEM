@@ -385,6 +385,7 @@ void Problem::start()
 		m->integrationThread->deleteLater();
 	}
 	m->integrationThread = new IntegrationThread(m->interactiveInput, m->interactiveOutput, directory());
+	connect(m->integrationThread, & IntegrationThread::iterationFinished, m->elementData, qOverload<>(& ElementData::updateFields));
 	m->integrationThread->start();
 //	m->integrateInterrupt = 0;
 

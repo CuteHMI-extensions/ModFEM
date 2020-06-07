@@ -10,6 +10,10 @@ Entity {
 
 	property NSSUPGHeat.ElementData elementData
 
+	property NSSUPGHeat.AbstractColorMapper triangleColorMapper
+
+	property NSSUPGHeat.AbstractColorMapper quadTriangleColorMapper
+
 	property bool nodesEnabled: false
 
 	property bool linesEnabled: true
@@ -66,30 +70,30 @@ Entity {
 		rotationZ: root.rotationZ
 	}
 
-	property var bcColorMap: [
-		Qt.rgba(0.8, 0.1, 0.4, 1.0),
-		Qt.rgba(0.8, 0.1, 0.4, 1.0),
-		Qt.rgba(0.8, 0.1, 0.4, 1.0),
-		Qt.rgba(0.8, 0.1, 0.4, 1.0),
-		Qt.rgba(0.8, 0.1, 0.4, 1.0),
-		Qt.rgba(0.8, 0.1, 0.4, 1.0),
-		Qt.rgba(0.8, 0.1, 0.4, 1.0),
-		Qt.rgba(0.8, 0.1, 0.4, 1.0),
-		Qt.rgba(0.8, 0.1, 0.4, 1.0),
-		Qt.rgba(0.8, 0.1, 0.4, 1.0),
-		Qt.rgba(0.8, 0.1, 0.4, 1.0),
-		Qt.rgba(0.8, 0.1, 0.4, 1.0),
-		Qt.rgba(0.8, 0.1, 0.4, 1.0),
-		Qt.rgba(0.8, 0.1, 0.4, 1.0),
-		Qt.rgba(0.8, 0.1, 0.4, 1.0),
-//		Qt.hsla(0.0, 1.0, 0.35, 1.0),
-//		Qt.hsla(0.125, 1.0, 0.35, 1.0),
-//		Qt.hsla(0.25, 1.0, 0.35, 1.0),
-//		Qt.hsla(0.375, 1.0, 0.35, 1.0),
-//		Qt.hsla(0.5, 1.0, 0.35, 1.0),
-//		Qt.hsla(0.625, 1.0, 0.35, 1.0),
-//		Qt.hsla(0.75, 1.0, 0.35, 1.0),
-//		Qt.hsla(0.875, 1.0, 0.35, 1.0)
+	property var bcPalette: [
+//		Qt.rgba(0.8, 0.1, 0.4, 1.0),
+//		Qt.rgba(0.8, 0.1, 0.4, 1.0),
+//		Qt.rgba(0.8, 0.1, 0.4, 1.0),
+//		Qt.rgba(0.8, 0.1, 0.4, 1.0),
+//		Qt.rgba(0.8, 0.1, 0.4, 1.0),
+//		Qt.rgba(0.8, 0.1, 0.4, 1.0),
+//		Qt.rgba(0.8, 0.1, 0.4, 1.0),
+//		Qt.rgba(0.8, 0.1, 0.4, 1.0),
+//		Qt.rgba(0.8, 0.1, 0.4, 1.0),
+//		Qt.rgba(0.8, 0.1, 0.4, 1.0),
+//		Qt.rgba(0.8, 0.1, 0.4, 1.0),
+//		Qt.rgba(0.8, 0.1, 0.4, 1.0),
+//		Qt.rgba(0.8, 0.1, 0.4, 1.0),
+//		Qt.rgba(0.8, 0.1, 0.4, 1.0),
+//		Qt.rgba(0.8, 0.1, 0.4, 1.0),
+		Qt.hsla(0.0, 1.0, 0.35, 1.0),
+		Qt.hsla(0.125, 1.0, 0.35, 1.0),
+		Qt.hsla(0.25, 1.0, 0.35, 1.0),
+		Qt.hsla(0.375, 1.0, 0.35, 1.0),
+		Qt.hsla(0.5, 1.0, 0.35, 1.0),
+		Qt.hsla(0.625, 1.0, 0.35, 1.0),
+		Qt.hsla(0.75, 1.0, 0.35, 1.0),
+		Qt.hsla(0.875, 1.0, 0.35, 1.0)
 	]
 
 	NSSUPGHeat.HueColorMapper {
@@ -102,7 +106,7 @@ Entity {
 	}
 
 	NSSUPGHeat.HueColorMapper {
-		id: quadTemperaturesColorMapper
+		id: quadTriangleTemperaturesColorMapper
 
 		valueBegin: -65.0
 		valueEnd: 300
@@ -110,25 +114,25 @@ Entity {
 		inputType: NSSUPGHeat.HueColorMapper.INPUT_DOUBLE
 	}
 
-	NSSUPGHeat.VertexColorMapper {
-		id: trianglesVertexColorMapper
+	NSSUPGHeat.PaletteColorMapper {
+		id: trianglesPaletteColorMapper
 
-		map: bcColorMap
-		colorIndices: elementData.triangles.boundaryConditions ? elementData.triangles.boundaryConditions : new ArrayBuffer
+		palette: bcPalette
+		input: elementData.triangles.boundaryConditions ? elementData.triangles.boundaryConditions : new ArrayBuffer
 	}
 
-	NSSUPGHeat.VertexColorMapper {
-		id: quadsTriangleVertexColorMapper
+	NSSUPGHeat.PaletteColorMapper {
+		id: quadsTrianglePaletteColorMapper
 
-		map: bcColorMap
-		colorIndices: elementData.quads.triangleBoundaryConditions ? elementData.quads.triangleBoundaryConditions : new ArrayBuffer
+		palette: bcPalette
+		input: elementData.quads.triangleBoundaryConditions ? elementData.quads.triangleBoundaryConditions : new ArrayBuffer
 	}
 
-	NSSUPGHeat.VertexColorMapper {
-		id: quadsVertexColorMapper
+	NSSUPGHeat.PaletteColorMapper {
+		id: quadsPaletteColorMapper
 
-		map: bcColorMap
-		colorIndices: elementData.quads.quadBoundaryConditions ? elementData.quads.quadBoundaryConditions : new ArrayBuffer
+		palette: bcPalette
+		input: elementData.quads.quadBoundaryConditions ? elementData.quads.quadBoundaryConditions : new ArrayBuffer
 	}
 
 	Entity {
@@ -185,9 +189,9 @@ Entity {
 					vertexSize: 3
 					byteOffset: 0
 					byteStride: vertexSize * Float32Array.BYTES_PER_ELEMENT
-					count: trianglesVertexColorMapper.count
+					count: trianglesPaletteColorMapper.count
 					buffer: Buffer {
-						data: trianglesVertexColorMapper.colorVertices
+						data: trianglesPaletteColorMapper.output
 					}
 				}
 			}
@@ -223,7 +227,7 @@ Entity {
 					byteStride: vertexSize * Float32Array.BYTES_PER_ELEMENT
 					count: elementData.quads.count * 4		// 4 vertices per quad.
 					buffer: Buffer {
-						data: quadsVertexColorMapper.colorVertices
+						data: quadsPaletteColorMapper.output
 					}
 				}
 			}
@@ -294,11 +298,13 @@ Entity {
 						vertexSize: 3
 						byteOffset: 0
 						byteStride: vertexSize * Float32Array.BYTES_PER_ELEMENT
-						count: quadTemperaturesColorMapper.count
-//						count: quadsTriangleVertexColorMapper.count
+						count: quadTriangleColorMapper.count
+//						count: quadTriangleTemperaturesColorMapper.count
+//						count: quadsTrianglePaletteColorMapper.count
 						buffer: Buffer {
-							data: quadTemperaturesColorMapper.output
-//							data: quadsTriangleVertexColorMapper.colorVertices
+//							data: quadTriangleTemperaturesColorMapper.output
+							data: quadTriangleColorMapper.output
+//							data: quadsTrianglePaletteColorMapper.output
 						}
 					}
 
@@ -347,11 +353,13 @@ Entity {
 						vertexSize: 3
 						byteOffset: 0
 						byteStride: vertexSize * Float32Array.BYTES_PER_ELEMENT
-//						count: trianglesVertexColorMapper.count
-						count: triangleTemperaturesColorMapper.count
+//						count: trianglesPaletteColorMapper.count
+//						count: triangleTemperaturesColorMapper.count
+						count: triangleColorMapper.count
 						buffer: Buffer {
-							data: triangleTemperaturesColorMapper.output
-//							data: trianglesVertexColorMapper.colorVertices
+							data: triangleColorMapper.output
+//							data: triangleTemperaturesColorMapper.output
+//							data: trianglesPaletteColorMapper.output
 						}
 					}
 

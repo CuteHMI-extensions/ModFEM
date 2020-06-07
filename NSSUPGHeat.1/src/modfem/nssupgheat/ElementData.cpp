@@ -100,7 +100,10 @@ void ElementData::selectAll()
 		clearArrays();
 		updateArrays(m->meshId);
 		updateProperties();
-		// updateFields
+
+		clearFieldArrays();
+		assignFieldValues();
+		updateFieldProperties();
 	} else
 		CUTEHMI_WARNING("Attempting to select elements on uninitialized mesh.");
 }
@@ -111,7 +114,10 @@ void ElementData::selectElement(int elementId)
 		clearArrays();
 		updateArrays(m->meshId, elementId);
 		updateProperties();
-		// updateFields(elementId)	?
+
+		clearFieldArrays();
+		assignFieldValues(elementId);
+		updateFieldProperties();
 	} else
 		CUTEHMI_WARNING("Attempting to select the element on uninitialized mesh.");
 }
@@ -125,7 +131,9 @@ void ElementData::updateFields()
 		elementId = mmr_get_next_act_elem(m->meshId, elementId);
 	}
 
+	clearFieldArrays();
 	assignFieldValues();
+	updateFieldProperties();
 }
 
 void ElementData::updateFields(int elementId)
@@ -149,7 +157,7 @@ void ElementData::updateFields(int elementId)
 //		int nrdofs = apr_get_ent_nrdofs(fieldId, APC_VERTEX, nodeIt);
 		for (int dofIt = 0; dofIt < solutionCount; dofIt++) {
 //			CUTEHMI_DEBUG("nodeIt: " << nodeIt << " nrdofs: " << nrdofs << " elNodes[nodeIt]: " << elNodes[nodeIt] << " elDofs[dofCtr]: " << elDofs[dofCtr++]);
-			CUTEHMI_DEBUG("Insert into " << elNodes[nodeIt] << " value " << elDofs[dofCtr] << " reserved size " << m->nodeTemperatures.size());
+//			CUTEHMI_DEBUG("Insert into " << elNodes[nodeIt] << " value " << elDofs[dofCtr] << " reserved size " << m->nodeTemperatures.size());
 			m->nodeTemperatures[elNodes[nodeIt]] = elDofs[dofCtr++];
 //			int nodeId = elNodes[nodeIt];
 ////			mf_check(dof_counter < (sizeof el_dofs) / sizeof(double), "Dof counter (%d) exceeds el_dofs size (%d)",	dof_counter, (sizeof el_dofs) / sizeof(double) );
@@ -182,22 +190,11 @@ void ElementData::updateFields(int elementId)
 
 void ElementData::assignFieldValues()
 {
-	m->triangleTemperatures.clear();
-	m->quadTemperatures.clear();
-	m->quadTriangleTemperatures.clear();
-
 	int elementId = mmr_get_next_act_elem(m->meshId, 0);
 	while (elementId != 0) {
 		assignFieldValues(elementId);
 		elementId = mmr_get_next_act_elem(m->meshId, elementId);
 	}
-
-	m->triangleFields["temperatures"] = m->triangleTemperatures;
-	emit triangleFieldsChanged();
-
-	m->quadFields["temperatures"] = m->quadTemperatures;
-	m->quadFields["triangleTemperatures"] = m->quadTriangleTemperatures;
-	emit quadFieldsChanged();
 }
 
 void ElementData::assignFieldValues(int elementId)
@@ -492,6 +489,23 @@ void ElementData::assignQuadTriangleFields(int meshId, int faceId)
 	appendScalar(m->nodeTemperatures[indices[4]], m->quadTriangleTemperatures);
 	appendScalar(m->nodeTemperatures[indices[3]], m->quadTriangleTemperatures);
 	appendScalar(m->nodeTemperatures[indices[1]], m->quadTriangleTemperatures);
+}
+
+void ElementData::updateFieldProperties()
+{
+	m->triangleFields["temperatures"] = m->triangleTemperatures;
+	emit triangleFieldsChanged();
+
+	m->quadFields["temperatures"] = m->quadTemperatures;
+	m->quadFields["triangleTemperatures"] = m->quadTriangleTemperatures;
+	emit quadFieldsChanged();
+}
+
+void ElementData::clearFieldArrays()
+{
+	m->triangleTemperatures.clear();
+	m->quadTemperatures.clear();
+	m->quadTriangleTemperatures.clear();
 }
 
 void ElementData::updateProperties()

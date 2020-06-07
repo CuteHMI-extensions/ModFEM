@@ -792,6 +792,8 @@ void IntegrationThread::nsSupgHeatIntegrate(char * Work_dir, FILE * Interactive_
 		time_ns_supg->cur_dtime = std::max(time_ns_supg->cur_dtime, minCurDTime);
 		time_heat->cur_dtime = time_ns_supg->cur_dtime;
 		CUTEHMI_DEBUG("Setting up new cur_dtime: " << time_ns_supg->cur_dtime);
+
+		emit iterationFinished();
 	}  //end loop over timesteps
 
 	if (iadapt == 0) {

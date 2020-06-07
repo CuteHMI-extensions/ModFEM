@@ -131,6 +131,10 @@ class MODFEM_NSSUPGHEAT_API ElementData:
 
 		void assignQuadTriangleFields(int meshId, int faceId);
 
+		void updateFieldProperties();
+
+		void clearFieldArrays();
+
 		void updateProperties();
 
 		void countEntities(int meshId);

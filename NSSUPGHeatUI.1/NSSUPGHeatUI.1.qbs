@@ -19,13 +19,15 @@ Project {
 		description: "Heat user interface."
 
 		files: [
+         "BCColorMappers.qml",
          "ElementsEntity.qml",
          "Main.qml",
          "MeshInfo.qml",
          "ProblemInfo.qml",
          "Scene3D.qml",
-		 "SurfaceEntity.qml",
-         "TestEntity.qml",
+         "SurfaceEntity.qml",
+         "TemperatureColorMappers.qml",
+		 "TestEntity.qml",
      ]
 
 		Depends { name: "CuteHMI.2" }
