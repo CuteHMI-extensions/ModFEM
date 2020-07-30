@@ -3,7 +3,7 @@
 namespace modfem {
 namespace nssupgheat {
 
-const QColor PaletteColorMapper::INITIAL_DEFAULT_COLOR = QColor("limegreen");
+const QColor PaletteColorMapper::INITIAL_DEFAULT_COLOR = QColor("grey");
 
 PaletteColorMapper::PaletteColorMapper(QObject * parent):
 	AbstractColorMapper(parent),
@@ -50,6 +50,7 @@ void PaletteColorMapper::updateOutput()
 	while (indicesBytes != input().constEnd()) {
 		int colorIndex = *reinterpret_cast<const int *>(indicesBytes);
 		QColor color = m->palette.value(colorIndex, m->defaultColor).value<QColor>();
+//		CUTEHMI_DEBUG("colorIndex: " << colorIndex << " " << color);
 		float colorVector[3];
 		colorVector[0] = color.redF();
 		colorVector[1] = color.greenF();

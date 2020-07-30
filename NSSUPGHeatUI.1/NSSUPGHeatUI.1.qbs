@@ -21,13 +21,13 @@ Project {
 		files: [
          "BCColorMappers.qml",
          "ElementsEntity.qml",
-         "Main.qml",
          "MeshInfo.qml",
          "ProblemInfo.qml",
          "Scene3D.qml",
          "SurfaceEntity.qml",
          "TemperatureColorMappers.qml",
-		 "TestEntity.qml",
+         "TestEntity.qml",
+         "View.qml",
      ]
 
 		Depends { name: "CuteHMI.2" }

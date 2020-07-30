@@ -32,7 +32,6 @@ Project {
          "src/modfem/nssupgheat/AbstractColorMapper.cpp",
          "src/modfem/nssupgheat/BoundaryConditionsData.cpp",
 		 "src/modfem/nssupgheat/ElementData.cpp",
-         "src/modfem/nssupgheat/HueColorMapper.cpp",
          "src/modfem/nssupgheat/IntegrationThread.cpp",
          "src/modfem/nssupgheat/PaletteColorMapper.cpp",
          "src/modfem/nssupgheat/Problem.cpp",

@@ -29,7 +29,6 @@ Project {
          "include/modfem/nssupgheat/metadata.hpp",
          "src/modfem/nssupgheat/BoundaryConditionsData.cpp",
          "src/modfem/nssupgheat/ElementData.cpp",
-         "src/modfem/nssupgheat/HueColorMapper.cpp",
          "src/modfem/nssupgheat/Problem.cpp",
          "src/modfem/nssupgheat/ScalarFieldNodes.cpp",
          "src/modfem/nssupgheat/HueColorMapper.cpp",

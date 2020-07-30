@@ -8,7 +8,7 @@ import Qt3D.Render 2.0
 import Qt3D.Input 2.0
 import Qt3D.Extras 2.0
 
-import CuteHMI.Symbols.HVAC 0.0
+import CuteHMI.Symbols.HVAC 1.0
 
 Item {
 	Rectangle {
