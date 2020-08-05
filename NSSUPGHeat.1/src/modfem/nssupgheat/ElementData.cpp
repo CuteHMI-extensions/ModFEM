@@ -39,7 +39,14 @@ ElementData::ElementData(QObject * parent):
 	{},
 	{},
 	{},
-	{}})
+	{},
+	{},
+	{},
+	{},
+	std::numeric_limits<double>::max(),
+	std::numeric_limits<double>::lowest(),
+	std::numeric_limits<double>::max(),
+	std::numeric_limits<double>::lowest()})
 {
 	m->count["elements"] = 0;
 //	m->count["faces"] = 0;
@@ -86,9 +93,30 @@ QVariantMap ElementData::quadFields() const
 	return m->quadFields;
 }
 
+double ElementData::minTemperature() const
+{
+	return m->minTemperature;
+}
+
+double ElementData::maxTemperature() const
+{
+	return m->maxTemperature;
+}
+
+double ElementData::minPressure() const
+{
+	return m->minPressure;
+}
+
+double ElementData::maxPressure() const
+{
+	return m->maxPressure;
+}
+
 void ElementData::init(int meshId)
 {
 	m->meshId = meshId;
+	clearRecords();
 	countEntities(meshId);
 	reserveArrays();
 	selectAll();
@@ -159,6 +187,8 @@ void ElementData::updateFields(int elementId)
 //			CUTEHMI_DEBUG("nodeIt: " << nodeIt << " nrdofs: " << nrdofs << " elNodes[nodeIt]: " << elNodes[nodeIt] << " elDofs[dofCtr]: " << elDofs[dofCtr++]);
 //			CUTEHMI_DEBUG("Insert into " << elNodes[nodeIt] << " value " << elDofs[dofCtr] << " reserved size " << m->nodeTemperatures.size());
 			m->nodeTemperatures[elNodes[nodeIt]] = elDofs[dofCtr++];
+			maybeSetMinTemperature(static_cast<double>(m->nodeTemperatures[elNodes[nodeIt]]));
+			maybeSetMaxTemperature(static_cast<double>(m->nodeTemperatures[elNodes[nodeIt]]));
 //			int nodeId = elNodes[nodeIt];
 ////			mf_check(dof_counter < (sizeof el_dofs) / sizeof(double), "Dof counter (%d) exceeds el_dofs size (%d)",	dof_counter, (sizeof el_dofs) / sizeof(double) );
 //			solInfos[node_id].dofs[dofIndex] = elDofs[dofCounter];
@@ -184,6 +214,8 @@ void ElementData::updateFields(int elementId)
 			m->nodeVelocities[elNodes[nodeIt]][1] = elDofs[dofCtr++];
 			m->nodeVelocities[elNodes[nodeIt]][2] = elDofs[dofCtr++];
 			m->nodePressures[elNodes[nodeIt]] = elDofs[dofCtr++];
+			maybeSetMinPressure(static_cast<double>(m->nodePressures[elNodes[nodeIt]]));
+			maybeSetMaxPressure(static_cast<double>(m->nodePressures[elNodes[nodeIt]]));
 		}
 	}
 }
@@ -220,6 +252,46 @@ void ElementData::assignFieldValues(int elementId)
 			default:
 				CUTEHMI_CRITICAL("Unsupported face type: '" << mmr_fa_type(m->meshId, faces[i]) << "'");
 		}
+	}
+}
+
+void ElementData::clearRecords()
+{
+	m->minTemperature = std::numeric_limits<double>::max();
+	m->maxTemperature = std::numeric_limits<double>::min();
+	m->minPressure = std::numeric_limits<double>::max();
+	m->maxPressure = std::numeric_limits<double>::min();
+}
+
+void ElementData::maybeSetMinTemperature(double temperature)
+{
+	if (m->minTemperature > temperature) {
+		m->minTemperature = temperature;
+		emit minTemperatureChanged();
+	}
+}
+
+void ElementData::maybeSetMaxTemperature(double temperature)
+{
+	if (m->maxTemperature < temperature) {
+		m->maxTemperature = temperature;
+		emit maxTemperatureChanged();
+	}
+}
+
+void ElementData::maybeSetMinPressure(double pressure)
+{
+	if (m->minPressure > pressure) {
+		m->minPressure = pressure;
+		emit minPressureChanged();
+	}
+}
+
+void ElementData::maybeSetMaxPressure(double pressure)
+{
+	if (m->maxPressure < pressure) {
+		m->maxPressure = pressure;
+		emit maxPressureChanged();
 	}
 }
 
@@ -266,6 +338,9 @@ void ElementData::reserveArrays()
 	m->quadTemperatures.reserve(m->count["quads"].toInt() * 4 * FREAL_SIZE);
 	m->quadTriangleTemperatures.reserve(m->count["quads"].toInt() * 6 * FREAL_SIZE);
 
+	m->trianglePressures.reserve(m->count["triangles"].toInt() * 3 * FREAL_SIZE);
+	m->quadPressures.reserve(m->count["quads"].toInt() * 4 * FREAL_SIZE);
+	m->quadTrianglePressures.reserve(m->count["quads"].toInt() * 6 * FREAL_SIZE);
 }
 
 void ElementData::updateArrays(int meshId)
@@ -465,8 +540,10 @@ void ElementData::assignTriangleFields(int meshId, int faceId)
 	int indices[4];		// Triangle faces require 4 indices (first element contains amount of coordinates).
 	mmr_fa_node_coor(meshId, faceId, indices, nullptr);
 
-	for (int i = 1; i <= 3; i++)
+	for (int i = 1; i <= 3; i++) {
 		appendScalar(m->nodeTemperatures[indices[i]], m->triangleTemperatures);
+		appendScalar(m->nodePressures[indices[i]], m->trianglePressures);
+	}
 }
 
 void ElementData::assignQuadFields(int meshId, int faceId)
@@ -474,8 +551,10 @@ void ElementData::assignQuadFields(int meshId, int faceId)
 	int indices[5];		// Quad faces require 5 indices (first element contains amount of coordinates).
 	mmr_fa_node_coor(meshId, faceId, indices, nullptr);
 
-	for (int i = 1; i <= 4; i++)
+	for (int i = 1; i <= 4; i++) {
 		appendScalar(m->nodeTemperatures[indices[i]], m->quadTemperatures);
+		appendScalar(m->nodePressures[indices[i]], m->quadPressures);
+	}
 }
 
 void ElementData::assignQuadTriangleFields(int meshId, int faceId)
@@ -489,15 +568,25 @@ void ElementData::assignQuadTriangleFields(int meshId, int faceId)
 	appendScalar(m->nodeTemperatures[indices[4]], m->quadTriangleTemperatures);
 	appendScalar(m->nodeTemperatures[indices[3]], m->quadTriangleTemperatures);
 	appendScalar(m->nodeTemperatures[indices[1]], m->quadTriangleTemperatures);
+
+	appendScalar(m->nodePressures[indices[1]], m->quadTrianglePressures);
+	appendScalar(m->nodePressures[indices[2]], m->quadTrianglePressures);
+	appendScalar(m->nodePressures[indices[3]], m->quadTrianglePressures);
+	appendScalar(m->nodePressures[indices[4]], m->quadTrianglePressures);
+	appendScalar(m->nodePressures[indices[3]], m->quadTrianglePressures);
+	appendScalar(m->nodePressures[indices[1]], m->quadTrianglePressures);
 }
 
 void ElementData::updateFieldProperties()
 {
 	m->triangleFields["temperatures"] = m->triangleTemperatures;
+	m->triangleFields["pressures"] = m->trianglePressures;
 	emit triangleFieldsChanged();
 
 	m->quadFields["temperatures"] = m->quadTemperatures;
 	m->quadFields["triangleTemperatures"] = m->quadTriangleTemperatures;
+	m->quadFields["pressures"] = m->quadPressures;
+	m->quadFields["trianglePressures"] = m->quadTrianglePressures;
 	emit quadFieldsChanged();
 }
 
@@ -506,6 +595,9 @@ void ElementData::clearFieldArrays()
 	m->triangleTemperatures.clear();
 	m->quadTemperatures.clear();
 	m->quadTriangleTemperatures.clear();
+	m->trianglePressures.clear();
+	m->quadPressures.clear();
+	m->quadTrianglePressures.clear();
 }
 
 void ElementData::updateProperties()

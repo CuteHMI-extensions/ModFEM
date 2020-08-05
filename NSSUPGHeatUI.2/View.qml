@@ -1,5 +1,5 @@
 import QtQml 2.12
-import QtQuick 2.0
+import QtQuick 2.14
 import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.3
 
@@ -63,7 +63,7 @@ Item {
 				}
 
 				ComboBox {
-					model: [qsTr("BC"), qsTr("Temperature")]
+					model: [qsTr("BC"), qsTr("Temperature"), qsTr("Pressure"), qsTr("Velocity magnitude"), qsTr("Velocity X"), qsTr("Velocity Y"), qsTr("Velocity Z")]
 
 					onCurrentIndexChanged: {
 						switch (currentIndex) {
@@ -72,6 +72,10 @@ Item {
 								break
 							case 1:
 								colorMappersInstantiator.delegate = Qt.createComponent("TemperatureColorMappers.qml")
+								break
+							case 2:
+								colorMappersInstantiator.delegate = Qt.createComponent("PressureColorMappers.qml")
+								break
 						}
 					}
 				}
@@ -203,6 +207,10 @@ Item {
 
 					onClicked: problem.writeParaview()
 				}
+
+				Button {
+					text: qsTr("View entity")
+				}
 			}
 
 			Rectangle {
@@ -246,22 +254,36 @@ Item {
 				}
 
 				Row {
+					id: header3d
+
 					x: parent.width - width - 10
 					y: 10
 					spacing: 10
 
-					/// @todo turn rectangle to icon with arrow keys symbol.
-					Rectangle {
+					Image {
 						opacity: scene3d.focus
 
-						width: 10
-						height: 10
-
-						color: "transparent"
-						border.color: "white"
-						border.width: 1
+						fillMode: Image.PreserveAspectFit
+						sourceSize.width: 25
+						sourceSize.height: 25
+						source: "images/keyboard-white-18dp.svg"
 
 						Behavior on opacity { NumberAnimation {} }
+					}
+				}
+
+				Row {
+					id: footer3d
+
+					x: 10
+					y: parent.height - height
+					spacing: 10
+
+					Axes {
+						width: 150
+						height: 150
+
+						rotationMatrix: rootEntity.cameraRotationMatrix
 					}
 				}
 			}
@@ -282,6 +304,11 @@ Item {
 				elementData: problem.elementData
 			}
 
+			SolutionInfo {
+				Layout.minimumWidth: Math.max(parent.width, Layout.preferredWidth)
+
+				problem: problem
+			}
 		}
 	}
 

@@ -7,7 +7,6 @@ import ModFEM.NSSUPGHeat 1.0
 ColumnLayout {
 	property ElementData elementData
 
-
 	GroupBox {
 		Layout.minimumWidth: Math.max(parent.width, Layout.preferredWidth)
 

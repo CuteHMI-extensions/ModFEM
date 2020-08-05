@@ -32,6 +32,14 @@ class MODFEM_NSSUPGHEAT_API ElementData:
 		// Note: GL_QUADS have been removed from OpenGL, so quadFields offer 'triangleTemperatures' mapping.
 		Q_PROPERTY(QVariantMap quadFields READ quadFields NOTIFY quadFieldsChanged)
 
+		Q_PROPERTY(double minTemperature READ minTemperature NOTIFY minTemperatureChanged)
+
+		Q_PROPERTY(double maxTemperature READ maxTemperature NOTIFY maxTemperatureChanged)
+
+		Q_PROPERTY(double minPressure READ minPressure NOTIFY minPressureChanged)
+
+		Q_PROPERTY(double maxPressure READ maxPressure NOTIFY maxPressureChanged)
+
 		explicit ElementData(QObject * parent = nullptr);
 
 		QVariantMap count() const;
@@ -47,6 +55,14 @@ class MODFEM_NSSUPGHEAT_API ElementData:
 		QVariantMap triangleFields() const;
 
 		QVariantMap quadFields() const;
+
+		double minTemperature() const;
+
+		double maxTemperature() const;
+
+		double minPressure() const;
+
+		double maxPressure() const;
 
 	public slots:
 		void init(int meshId);
@@ -78,8 +94,16 @@ class MODFEM_NSSUPGHEAT_API ElementData:
 
 		void quadFieldsChanged();
 
+		void minTemperatureChanged();
+
+		void maxTemperatureChanged();
+
+		void minPressureChanged();
+
+		void maxPressureChanged();
+
 	private:
-		typedef double freal;
+		typedef double freal;	// Field real type.
 
 		typedef QVector<freal> ScalarFieldContainer;
 		typedef QVector<std::array<freal, 3>> Vector3FieldContainer;
@@ -110,6 +134,16 @@ class MODFEM_NSSUPGHEAT_API ElementData:
 
 		// Size of field value in bytes.
 		static constexpr std::size_t FREAL_SIZE = sizeof(freal);
+
+		void clearRecords();
+
+		void maybeSetMinTemperature(double temperature);
+
+		void maybeSetMaxTemperature(double temperature);
+
+		void maybeSetMinPressure(double pressure);
+
+		void maybeSetMaxPressure(double pressure);
 
 		void clearArrays();
 
@@ -186,6 +220,13 @@ class MODFEM_NSSUPGHEAT_API ElementData:
 			QByteArray triangleTemperatures;
 			QByteArray quadTemperatures;
 			QByteArray quadTriangleTemperatures;
+			QByteArray trianglePressures;
+			QByteArray quadPressures;
+			QByteArray quadTrianglePressures;
+			double minTemperature;
+			double maxTemperature;
+			double minPressure;
+			double maxPressure;
 		};
 
 		cutehmi::MPtr<Members> m;

@@ -14,6 +14,8 @@ Entity {
 
 	property alias lineWidth: renderSettings.lineWidth
 
+	property alias cameraRotationMatrix: cameraRotationTransform.matrix
+
 	RenderSettings {
 		id: renderSettings
 
@@ -77,5 +79,11 @@ Entity {
 		camera: camera1
 
 		linearSpeed: 100
+	}
+
+	Transform {
+		id: cameraRotationTransform
+
+		rotation: camera1.transform.rotation
 	}
 }
