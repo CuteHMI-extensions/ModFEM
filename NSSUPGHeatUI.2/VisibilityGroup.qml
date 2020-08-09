@@ -13,6 +13,8 @@ GroupBox {
 
 	property alias facesEnabled: facesCheckbox.checked
 
+	property alias alpha: alphaSlider.value
+
 	Column {
 		CheckBox {
 			id: nodesCheckbox
@@ -33,6 +35,21 @@ GroupBox {
 
 			checked: true
 			text: qsTr("Faces")
+		}
+
+		RowLayout {
+			Label {
+				text: qsTr("Alpha:")
+			}
+
+			Slider {
+				id: alphaSlider
+
+				from: 0.0
+				to: 1.0
+
+				value: 1.0
+			}
 		}
 	}
 }

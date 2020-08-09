@@ -20,54 +20,51 @@ Entity {
 
 	property bool facesEnabled: true
 
+	property real alpha: 0.3
+
 	property alias transform: transform
+
+	property vector3d maxExtent: lineRenderer.geometry.maxExtent
+
+	property vector3d minExtent: lineRenderer.geometry.minExtent
 
 	property ShaderData clipPlanesData
 
-	PhongMaterial {
+	PhongAlphaClipMaterial {
 		id: nodeMaterial
 
 		ambient: "red"
 		diffuse: "red"
 		shininess: 0.0
+
+		clipPlanesData: root.clipPlanesData
 	}
 
-//	PerVertexColorMaterial {
-//		id: nodeMaterial
-//	}
-
-	PhongMaterial {
+	PhongAlphaClipMaterial {
 		id: lineMaterial
 
 		ambient: "white"
 		diffuse: "white"
 		shininess: 0.0
-	}
-
-//	PhongMaterial {
-//		id: faceMaterial
-
-//		diffuse: Qt.rgba(0.1, 0.5, 0.1, 1.0)
-//		ambient: Qt.rgba(0.2, 0.6, 0.2, 1.0)
-//		specular: Qt.rgba(0.2, 0.8, 0.2, 1.0)
-//		shininess: 1.0
-//	}
-
-	PerVertexColorClipMaterial {
-		id: faceMaterial
+		alpha: 1.0
 
 		clipPlanesData: root.clipPlanesData
 	}
 
-//	CustomPhongAlphaMaterial {
-//		id: faceMaterial
-//	}
+	//	PhongAlphaClipMaterial {
+	//		ambient: "green"
+	//		diffuse: "green"
 
-//	PhongClipMaterial {
-//		id: faceMaterial
+	VertexAlphaClipMaterial {
+		id: faceMaterial
 
-//		clipPlanesData: root.clipPlanesData
-//	}
+		clipPlanesData: root.clipPlanesData
+
+		alpha: root.alpha
+		cullFace: CullFace {
+			mode: CullFace.NoCulling
+		}
+	}
 
 	Transform {
 		id: transform

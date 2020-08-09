@@ -1,0 +1,46 @@
+Problem:
+
+Whenever `gl_ClipDistance` is used in vertex shader, nvidia driver seems to 
+enable clip distance whether the variable is set or not. This leads to 
+uninitialized `gl_ClipDistance` value, when actual number of planes is zero.
+
+For example in the code below, if `clipPlanesData.count` is set to zero, it will
+result in glitches, because driver for some reason uses gl_ClipDistance[0] even
+tho' it is untouched by the loop.
+```
+for (int i = 0; i < clipPlanesData.count; ++i) {
+	gl_ClipDistance[i] = dot(vec4(wp, 1.0), clipPlanesData.planes[i].equation);
+}
+```
+
+Investigation:
+
+Checking `clipPlanesData.count` if its zero and setting `gl_ClipDistance[0]` 
+fixes the problem.
+
+```
+    if (clipPlanesData.count == 0)
+        gl_ClipDistance[0] = 1.0;
+```
+
+On the other hand any expression, which isn't optimized. but evaluates to 
+`false` causes the driver to pick random values for `gl_ClipDistance[0]` and 
+produces glitches.
+```
+   if (worldNormal[0] == 99999.0)
+        gl_ClipDistance[0] = 1.0;
+```
+
+
+
+Workaround:
+
+Workaround is to initialize `gl_ClipDistance[0]` with positive value.
+
+```
+	gl_ClipDistance[0] = 1.0;
+```
+
+
+Snippet:
+

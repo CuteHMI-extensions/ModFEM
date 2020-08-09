@@ -31,6 +31,7 @@ Entity {
 		RenderSurfaceSelector {
 			ClearBuffers {
 				buffers : ClearBuffers.ColorDepthBuffer
+				clearColor: "transparent"
 
 				CameraSelector {
 					camera: camera1

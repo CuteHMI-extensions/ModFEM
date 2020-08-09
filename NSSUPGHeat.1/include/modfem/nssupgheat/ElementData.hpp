@@ -2,8 +2,12 @@
 #define H_EXTENSIONS_MODFEM_HEAT_0_INCLUDE_MODFEM_HEAT_ELEMENTDATA_HPP
 
 #include "internal/common.hpp"
+#include "AbstractProbe.hpp"
+#include "ScalarProbe.hpp"
+#include "Vector3Probe.hpp"
 
 #include <QObject>
+#include <QQmlListProperty>
 
 namespace modfem {
 namespace nssupgheat {
@@ -40,6 +44,8 @@ class MODFEM_NSSUPGHEAT_API ElementData:
 
 		Q_PROPERTY(double maxPressure READ maxPressure NOTIFY maxPressureChanged)
 
+		Q_PROPERTY(QQmlListProperty<modfem::nssupgheat::AbstractProbe> probes READ probeList)
+
 		explicit ElementData(QObject * parent = nullptr);
 
 		QVariantMap count() const;
@@ -64,6 +70,8 @@ class MODFEM_NSSUPGHEAT_API ElementData:
 
 		double maxPressure() const;
 
+		QQmlListProperty<AbstractProbe> probeList();
+
 	public slots:
 		void init(int meshId);
 
@@ -78,6 +86,8 @@ class MODFEM_NSSUPGHEAT_API ElementData:
 		void assignFieldValues();
 
 		void assignFieldValues(int elementId);
+
+		void updateProbes();
 
 	signals:
 		void countChanged();
@@ -107,6 +117,9 @@ class MODFEM_NSSUPGHEAT_API ElementData:
 
 		typedef QVector<freal> ScalarFieldContainer;
 		typedef QVector<std::array<freal, 3>> Vector3FieldContainer;
+		typedef QList<AbstractProbe *> ProbeContainer;
+		typedef QHash<ScalarProbe *, std::pair<ScalarFieldContainer *, int>> ProbeScalarFieldNodeMap;
+		typedef QHash<Vector3Probe *, std::pair<Vector3FieldContainer *, int>> ProbeVector3FieldNodeMap;
 
 		// Dimension of coordinate.
 		static constexpr std::size_t COORD_DIM = 3;
@@ -135,7 +148,19 @@ class MODFEM_NSSUPGHEAT_API ElementData:
 		// Size of field value in bytes.
 		static constexpr std::size_t FREAL_SIZE = sizeof(freal);
 
+		static int ProbeListCount(QQmlListProperty<AbstractProbe> * property);
+
+		static AbstractProbe * ProbeListAt(QQmlListProperty<AbstractProbe> * property, int index);
+
+		static void ProbeListClear(QQmlListProperty<AbstractProbe> * property);
+
+		static void ProbeListAppend(QQmlListProperty<AbstractProbe> * property, AbstractProbe * value);
+
+		const ProbeContainer & probes() const;
+
 		void clearRecords();
+
+		void clearProbes();
 
 		void maybeSetMinTemperature(double temperature);
 
@@ -172,6 +197,10 @@ class MODFEM_NSSUPGHEAT_API ElementData:
 		void updateProperties();
 
 		void countEntities(int meshId);
+
+		void attachProbes();
+
+		void findClosestNode(AbstractProbe * probe);
 
 		template <std::size_t DIM, typename T>
 		void appendVector(T * vector,  QByteArray & array);
@@ -227,6 +256,20 @@ class MODFEM_NSSUPGHEAT_API ElementData:
 			double maxTemperature;
 			double minPressure;
 			double maxPressure;
+			ProbeContainer probes;
+			QQmlListProperty<AbstractProbe> probeList;
+			ProbeScalarFieldNodeMap probeScalarFieldNodeMap;
+			ProbeVector3FieldNodeMap probeVector3FieldNodeMap;
+
+			Members(ElementData * p_parent):
+				meshId(0),
+				minTemperature(std::numeric_limits<double>::max()),
+				maxTemperature(std::numeric_limits<double>::lowest()),
+				minPressure(std::numeric_limits<double>::max()),
+				maxPressure(std::numeric_limits<double>::lowest()),
+				probeList(p_parent, & probes, & ElementData::ProbeListAppend, & ElementData::ProbeListCount, & ElementData::ProbeListAt, & ElementData::ProbeListClear)
+			{
+			}
 		};
 
 		cutehmi::MPtr<Members> m;

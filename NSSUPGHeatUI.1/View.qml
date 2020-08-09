@@ -369,7 +369,7 @@ Item {
 
 							nodesEnabled: nodesCheckbox.checked
 							linesEnabled: linesCheckbox.checked
-							facesEnabled: facesCheckbox.checked
+							facesEnabled: facesCheckbox.checked							
 						}
 					}
 				}

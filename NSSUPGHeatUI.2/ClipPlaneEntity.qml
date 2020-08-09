@@ -15,20 +15,44 @@ Entity {
 
 	readonly property vector4d equation: Qt.vector4d(normal.x, normal.y, normal.z, -(normal.x * transform.translation.x + normal.y * transform.translation.y + normal.z * transform.translation.z))
 
-	PhongAlphaMaterial {
+	PhongAlphaClipMaterial {
 		id: material
 
-		ambient: "red"
-		diffuse: "red"
+		ambient: "yellow"
+		diffuse: "yellow"
+		specular: "yellow"
+		shininess: 0.0
 	}
 
-	PlaneMesh {
-        id: mesh
+	GeometryRenderer {
+		id: mesh
 
-		width: 20.0
-        height: 20.0
-        meshResolution: Qt.size(2, 2)
-    }
+		property real width: 20.0
+
+		property real height: 20.0
+
+		primitiveType: GeometryRenderer.LineLoop
+		instanceCount: 1
+		geometry: Geometry {
+			Attribute {
+				name: defaultPositionAttributeName
+				attributeType: Attribute.VertexAttribute
+				vertexBaseType: Attribute.Float
+				vertexSize: 3
+				byteOffset: 0
+				byteStride: vertexSize * Float32Array.BYTES_PER_ELEMENT
+				count: buffer.floatArr.length / vertexSize
+				buffer: Buffer {
+					data: floatArr
+					property var floatArr: new Float32Array([-width * 0.5, 0, height * 0.5,
+															 width * 0.5, 0, height * 0.5,
+															 width * 0.5, 0, -height * 0.5,
+															 -width * 0.5, 0, -height * 0.5
+															])
+				}
+			}
+		}
+	}
 
 	// Tranform component used to obtain rotation-only matrix.
 	Transform {

@@ -198,7 +198,7 @@ Entity {
 		rings: 100
 		slices: 20
 
-		//		primitiveType: GeometryRenderer.LineLoop
+//				primitiveType: GeometryRenderer.LineLoop
 	}
 
 	Transform {

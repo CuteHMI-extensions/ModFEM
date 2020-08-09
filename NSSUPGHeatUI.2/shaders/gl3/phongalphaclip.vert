@@ -2,11 +2,9 @@
 
 in vec3 vertexPosition;
 in vec3 vertexNormal;
-in vec4 vertexColor;
 
 out vec3 worldPosition;
 out vec3 worldNormal;
-out vec4 color;
 
 uniform mat4 modelMatrix;
 uniform mat3 modelNormalMatrix;
@@ -26,8 +24,7 @@ uniform ClipPlanesData clipPlanesData;
 void main()
 {
     worldNormal = normalize(modelNormalMatrix * vertexNormal);
-    worldPosition = vec3(modelMatrix * vec4( vertexPosition, 1.0 ));
-    color = vertexColor;
+    worldPosition = vec3(modelMatrix * vec4(vertexPosition, 1.0));
 
     // <ModFEM.NSSUPGHeatUI-1.workaround target="nvidia" cause="bug">
     gl_ClipDistance[0] = 1.0;

@@ -4,6 +4,8 @@ in vec3 worldPosition;
 in vec3 worldNormal;
 in vec4 color;
 
+uniform float alpha;
+
 out vec4 fragColor;
 
 uniform vec3 eyePosition;
@@ -119,8 +121,9 @@ vec4 phongFunction(const in vec4 ambient,
     vec3 color = (ambient.rgb + diffuseColor) * diffuse.rgb
                + specularColor * specular.rgb;
 
-    return vec4(color, diffuse.a);
+    return vec4(color, min(diffuse.a, alpha));
 }
+
 void main()
 {
     vec3 worldView = normalize(eyePosition - worldPosition);

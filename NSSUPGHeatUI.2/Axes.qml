@@ -1,12 +1,15 @@
 import QtQuick 2.0
 
+/**
+  Overlay axes item.
+  */
 Canvas {
 	id: root
 
 	implicitWidth: 100
 	implicitHeight: 100
 
-	property matrix4x4 rotationMatrix
+	property matrix4x4 rotationMatrix: Qt.matrix4x4()
 
 	property real arrowLength: 0.4 * width
 

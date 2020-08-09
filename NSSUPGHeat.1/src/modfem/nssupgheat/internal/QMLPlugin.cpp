@@ -8,6 +8,9 @@
 #include <modfem/nssupgheat/PaletteColorMapper.hpp>
 #include <modfem/nssupgheat/HueColorMapper.hpp>
 #include <modfem/nssupgheat/ScalarFieldNodes.hpp>
+#include <modfem/nssupgheat/AbstractProbe.hpp>
+#include <modfem/nssupgheat/ScalarProbe.hpp>
+#include <modfem/nssupgheat/Vector3Probe.hpp>
 
 #include <QtQml>
 
@@ -25,6 +28,9 @@ void QMLPlugin::registerTypes(const char * uri)
 	qmlRegisterType<modfem::nssupgheat::HueColorMapper>(uri, MODFEM_NSSUPGHEAT_MAJOR, 0, "HueColorMapper");
 	qmlRegisterType<modfem::nssupgheat::ScalarFieldNodes>(uri, MODFEM_NSSUPGHEAT_MAJOR, 0, "ScalarFieldNodes");
 	qmlRegisterUncreatableType<modfem::nssupgheat::ElementData>(uri, MODFEM_NSSUPGHEAT_MAJOR, 0, "ElementData", "Class 'modfem::heat::ElementData' can not be instantiated from QML");
+	qmlRegisterUncreatableType<modfem::nssupgheat::AbstractProbe>(uri, MODFEM_NSSUPGHEAT_MAJOR, 0, "AbstractProbe", "Class 'modfem::heat::AbstractProbe' can not be instantiated from QML");
+	qmlRegisterType<modfem::nssupgheat::ScalarProbe>(uri, MODFEM_NSSUPGHEAT_MAJOR, 0, "ScalarProbe");
+	qmlRegisterType<modfem::nssupgheat::Vector3Probe>(uri, MODFEM_NSSUPGHEAT_MAJOR, 0, "Vector3Probe");
 }
 
 }

@@ -13,12 +13,23 @@ import Qt.labs.settings 1.1
 
 import ModFEM.NSSUPGHeat 1.0
 
+import QtMultimedia 5.12	//temp
+
 Item {
 	anchors.fill: parent
 	anchors.margins: 10
 
 	Problem {
 		id: problem
+
+		elementData.probes: [
+			ScalarProbe {
+				id: probe1
+
+				position: probe1Entity.transform.translation
+				field: "temperature"
+			}
+		]
 	}
 
 	Instantiator {
@@ -44,6 +55,11 @@ Item {
 
 		ColumnLayout {
 			Layout.alignment: Qt.AlignTop
+
+			// Temporary label to show probe value
+			Label {
+				text: "Value: " + probe1.value
+			}
 
 			ElementSelectionGroup {
 				id: elementSelectionGroup
@@ -115,9 +131,9 @@ Item {
 				}
 
 				ComboBox {
-					model: ["Elements", "Clip plane"]
+					model: ["Elements", "Clip plane", "Probe 1"]
 
-					property var entities: [elementsEntity, clipPlane0Entity]
+					property var entities: [elementsEntity, clipPlane0Entity, probe1Entity]
 
 					onCurrentIndexChanged: settingsLayout.transformEntity = entities[currentIndex]
 				}
@@ -213,10 +229,20 @@ Item {
 				}
 			}
 
-			Rectangle {
+			VideoOutput {
+//			Rectangle {
 				Layout.fillHeight: true
 				Layout.fillWidth: true
-				color: "black"
+//				color: "black"
+
+					source: camera
+
+					Camera {
+						id: camera
+						// You can adjust various settings in here
+
+						deviceId: QtMultimedia.availableCameras[0].deviceId
+					}
 
 				Scene3D {
 					id: scene3d
@@ -235,6 +261,14 @@ Item {
 							}
 						}
 
+						ClipPlaneEntity {
+							id: clipPlane0Entity
+						}
+
+						ProbeEntity {
+							id: probe1Entity
+						}
+
 						ElementsEntity {
 							id: elementsEntity
 
@@ -244,11 +278,16 @@ Item {
 							nodesEnabled: visibilityGroup.nodesEnabled
 							linesEnabled: visibilityGroup.linesEnabled
 							facesEnabled: visibilityGroup.facesEnabled
+							alpha: visibilityGroup.alpha
 							clipPlanesData: rootEntity.clipPlanesData
 						}
 
-						ClipPlaneEntity {
-							id: clipPlane0Entity
+						NumberDisplayEntity {
+							id: numberDisplayEntity
+
+							display.value: probe1.value
+
+							transform.translation: Qt.vector3d(probe1Entity.transform.translation.x, elementsEntity.maxExtent.y + 2.5, probe1Entity.transform.translation.z)
 						}
 					}
 				}

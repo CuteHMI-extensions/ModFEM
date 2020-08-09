@@ -26,15 +26,15 @@ Material {
 		ShaderProgram {
 			id: gl3Shader
 
-			vertexShaderCode: loadSource(Qt.resolvedUrl("shaders/gl3/transparentTexture.vert"))
-			fragmentShaderCode: loadSource(Qt.resolvedUrl("shaders/gl3/transparentTexture.frag"))
+			vertexShaderCode: loadSource(Qt.resolvedUrl("shaders/gl3/transparenttexture.vert"))
+			fragmentShaderCode: loadSource(Qt.resolvedUrl("shaders/gl3/transparenttexture.frag"))
 		}
 
 		ShaderProgram {
 			id: es2Shader
 
-			vertexShaderCode: loadSource(Qt.resolvedUrl("shaders/es2/transparentTexture.vert"))
-			fragmentShaderCode: loadSource(Qt.resolvedUrl("shaders/es2/transparentTexture.frag"))
+			vertexShaderCode: loadSource(Qt.resolvedUrl("shaders/es2/transparenttexture.vert"))
+			fragmentShaderCode: loadSource(Qt.resolvedUrl("shaders/es2/transparenttexture.frag"))
 		}
 
 		techniques: [

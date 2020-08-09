@@ -11,42 +11,7 @@ namespace nssupgheat {
 
 ElementData::ElementData(QObject * parent):
 	QObject(parent),
-	m(new Members{
-	0,
-	{},
-	{},
-	{},
-	{},
-	{},
-	{},
-	{},
-	{},
-	{},
-	{},
-	{},
-	{},
-	{},
-	{},
-	{},
-	{},
-	{},
-	{},
-	{},
-	{},
-	{},
-	{},
-	{},
-	{},
-	{},
-	{},
-	{},
-	{},
-	{},
-	{},
-	std::numeric_limits<double>::max(),
-	std::numeric_limits<double>::lowest(),
-	std::numeric_limits<double>::max(),
-	std::numeric_limits<double>::lowest()})
+	m(new Members(this))
 {
 	m->count["elements"] = 0;
 //	m->count["faces"] = 0;
@@ -113,6 +78,11 @@ double ElementData::maxPressure() const
 	return m->maxPressure;
 }
 
+QQmlListProperty<AbstractProbe> ElementData::probeList()
+{
+	return m->probeList;
+}
+
 void ElementData::init(int meshId)
 {
 	m->meshId = meshId;
@@ -120,6 +90,8 @@ void ElementData::init(int meshId)
 	countEntities(meshId);
 	reserveArrays();
 	selectAll();
+	clearProbes();
+	attachProbes();
 }
 
 void ElementData::selectAll()
@@ -132,8 +104,7 @@ void ElementData::selectAll()
 		clearFieldArrays();
 		assignFieldValues();
 		updateFieldProperties();
-	} else
-		CUTEHMI_WARNING("Attempting to select elements on uninitialized mesh.");
+	}
 }
 
 void ElementData::selectElement(int elementId)
@@ -172,44 +143,25 @@ void ElementData::updateFields(int elementId)
 	int elNodes[MMC_MAXELVNO + 1] = {0};
 
 	int fieldId = pdv_heat_problem.ctrl.field_id;
-//	const int temperatureId = 0;
-
 	int solutionCount = apr_get_nreq(fieldId);
-//	CUTEHMI_DEBUG("solutionCount: " << solutionCount);
-
-//	CUTEHMI_DEBUG("apr_get_el_dofs: " << apr_get_el_dofs(fieldId, elementId, 1, elDofs));
 	apr_get_el_dofs(fieldId, elementId, 1, elDofs);
 	int nodeCount = mmr_el_node_coor(m->meshId, elementId, elNodes, NULL);
 	int dofCtr = 0;
 	for (int nodeIt = 1; nodeIt <= nodeCount; nodeIt++) {
-//		int nrdofs = apr_get_ent_nrdofs(fieldId, APC_VERTEX, nodeIt);
 		for (int dofIt = 0; dofIt < solutionCount; dofIt++) {
-//			CUTEHMI_DEBUG("nodeIt: " << nodeIt << " nrdofs: " << nrdofs << " elNodes[nodeIt]: " << elNodes[nodeIt] << " elDofs[dofCtr]: " << elDofs[dofCtr++]);
-//			CUTEHMI_DEBUG("Insert into " << elNodes[nodeIt] << " value " << elDofs[dofCtr] << " reserved size " << m->nodeTemperatures.size());
 			m->nodeTemperatures[elNodes[nodeIt]] = elDofs[dofCtr++];
 			maybeSetMinTemperature(static_cast<double>(m->nodeTemperatures[elNodes[nodeIt]]));
 			maybeSetMaxTemperature(static_cast<double>(m->nodeTemperatures[elNodes[nodeIt]]));
-//			int nodeId = elNodes[nodeIt];
-////			mf_check(dof_counter < (sizeof el_dofs) / sizeof(double), "Dof counter (%d) exceeds el_dofs size (%d)",	dof_counter, (sizeof el_dofs) / sizeof(double) );
-//			solInfos[node_id].dofs[dofIndex] = elDofs[dofCounter];
-//			//Fk-for testing material
-//			//solInfos[node_id].dofs[idof]=mmr_el_groupID(mesh_id, el_id);
-
-//			dofCounter++;
 		}
 	}
 
 	fieldId = pdv_ns_supg_problem.ctrl.field_id;
 	solutionCount = apr_get_nreq(fieldId);
-//	CUTEHMI_DEBUG("solutionCount: " << solutionCount);
-//	CUTEHMI_DEBUG("apr_get_el_dofs: " << apr_get_el_dofs(fieldId, elementId, 1, elDofs));
 	apr_get_el_dofs(fieldId, elementId, 1, elDofs);
 	nodeCount = mmr_el_node_coor(m->meshId, elementId, elNodes, NULL);
 	dofCtr = 0;
 	for (int nodeIt = 1; nodeIt <= nodeCount; nodeIt++) {
-//		int nrdofs = apr_get_ent_nrdofs(fieldId, APC_VERTEX, nodeIt);
 		for (int dofIt = 0; dofIt < solutionCount; dofIt++) {
-//			CUTEHMI_DEBUG("nodeIt: " << nodeIt << " nrdofs: " << nrdofs << " elNodes[nodeIt]: " << elNodes[nodeIt] << " elDofs[dofCtr]: " << elDofs[dofCtr++]);
 			m->nodeVelocities[elNodes[nodeIt]][0] = elDofs[dofCtr++];
 			m->nodeVelocities[elNodes[nodeIt]][1] = elDofs[dofCtr++];
 			m->nodeVelocities[elNodes[nodeIt]][2] = elDofs[dofCtr++];
@@ -255,12 +207,60 @@ void ElementData::assignFieldValues(int elementId)
 	}
 }
 
+void ElementData::updateProbes()
+{
+	for (auto it = m->probeScalarFieldNodeMap.begin(); it != m->probeScalarFieldNodeMap.end(); ++it)
+		it.key()->setValue(it.value().first->at(it.value().second));
+	for (auto it = m->probeVector3FieldNodeMap.begin(); it != m->probeVector3FieldNodeMap.end(); ++it) {
+		Vector3FieldContainer * container = it.value().first;
+		std::array<freal, 3> value = container->at(it.value().second);
+		it.key()->setValue(QVector3D(static_cast<float>(value[0]), static_cast<float>(value[1]), static_cast<float>(value[2])));
+	}
+}
+
+int ElementData::ProbeListCount(QQmlListProperty<AbstractProbe> * property)
+{
+	return static_cast<ProbeContainer *>(property->data)->count();
+}
+
+AbstractProbe * ElementData::ProbeListAt(QQmlListProperty<AbstractProbe> * property, int index)
+{
+	return static_cast<ProbeContainer *>(property->data)->value(index);
+}
+
+void ElementData::ProbeListClear(QQmlListProperty<AbstractProbe> * property)
+{
+	ElementData * elementData = static_cast<ElementData *>(property->object);
+	for (ProbeContainer::const_iterator it = elementData->probes().begin(); it != elementData->probes().end(); ++it) {
+		(*it)->disconnect(elementData);
+	}
+	static_cast<ProbeContainer *>(property->data)->clear();
+}
+
+void ElementData::ProbeListAppend(QQmlListProperty<AbstractProbe> * property, AbstractProbe * value)
+{
+	static_cast<ProbeContainer *>(property->data)->append(value);
+}
+
+const ElementData::ProbeContainer & ElementData::probes() const
+{
+	return m->probes;
+}
+
 void ElementData::clearRecords()
 {
 	m->minTemperature = std::numeric_limits<double>::max();
 	m->maxTemperature = std::numeric_limits<double>::min();
 	m->minPressure = std::numeric_limits<double>::max();
 	m->maxPressure = std::numeric_limits<double>::min();
+}
+
+void ElementData::clearProbes()
+{
+	for (auto probe : m->probes)
+		probe->disconnect(this);
+	m->probeScalarFieldNodeMap.clear();
+	m->probeVector3FieldNodeMap.clear();
 }
 
 void ElementData::maybeSetMinTemperature(double temperature)
@@ -688,6 +688,63 @@ void ElementData::countEntities(int meshId)
 	m->count["nodes"] = mmr_get_nr_node(meshId);
 	m->count["lines"] = lineCount;
 	emit countChanged();
+}
+
+void ElementData::attachProbes()
+{
+	for (auto probe : m->probes) {
+		// Find closest node for each of the probes (in futre approximation may be used).
+		findClosestNode(probe);
+		connect(probe, & AbstractProbe::positionChanged, this, [this, probe]() {
+			findClosestNode(probe);
+		});
+	}
+}
+
+void ElementData::findClosestNode(AbstractProbe * probe)
+{
+	static constexpr float INITIAL_DOT_PRODUCT = std::numeric_limits<float>::max();
+
+	int elNodes[MMC_MAXELVNO + 1] = {0};
+	double coords[3];
+	float dotProduct = INITIAL_DOT_PRODUCT;
+	int nodeId = 0;
+	int elementId = mmr_get_next_act_elem(m->meshId, 0);
+	while (elementId != 0) {
+		int nodeCount = mmr_el_node_coor(m->meshId, elementId, elNodes, NULL);
+		for (int nodeIt = 1; nodeIt <= nodeCount; nodeIt++) {
+			// Choose node which has least distance.
+			mmr_node_coor(m->meshId, elNodes[nodeIt], coords);
+			float newDotProduct = (probe->position() - QVector3D(static_cast<float>(coords[0]), static_cast<float>(coords[1]), static_cast<float>(coords[2]))).lengthSquared(); // Unfortunately QVector3D uses float, but it should be OK - pick does not be to super-precise.
+			if (newDotProduct < dotProduct) {
+				nodeId = elNodes[nodeIt];
+				dotProduct = newDotProduct;
+			}
+		}
+		elementId = mmr_get_next_act_elem(m->meshId, elementId);
+	}
+	if (dotProduct != INITIAL_DOT_PRODUCT) {
+		if (probe->field() == "temperature") {
+			ScalarProbe * scalarProbe = qobject_cast<ScalarProbe *>(probe);
+			if (scalarProbe)
+				m->probeScalarFieldNodeMap.insert(scalarProbe, std::make_pair(& m->nodeTemperatures, nodeId));
+			else
+				CUTEHMI_CRITICAL("Probe " << probe <<  " type is inadequate for scalar field '" << probe->field() << "'.");
+		} else if (probe->field() == "pressure") {
+			ScalarProbe * scalarProbe = qobject_cast<ScalarProbe *>(probe);
+			if (scalarProbe)
+				m->probeScalarFieldNodeMap.insert(scalarProbe, std::make_pair(& m->nodePressures, nodeId));
+			else
+				CUTEHMI_CRITICAL("Probe " << probe <<  " type is inadequate for scalar field '" << probe->field() << "'.");
+		} else if (probe->field() == "velocity") {
+			Vector3Probe * vector3Probe = qobject_cast<Vector3Probe *>(probe);
+			if (vector3Probe)
+				m->probeVector3FieldNodeMap.insert(vector3Probe, std::make_pair(& m->nodeVelocities, nodeId));
+			else
+				CUTEHMI_CRITICAL("Probe " << probe <<  " type is inadequate for 3D vector field '" << probe->field() << "'.");
+		} else
+			CUTEHMI_CRITICAL("Unrecognized field name '" << probe->field() << "'.");
+	}
 }
 
 template<std::size_t DIM, typename T>
