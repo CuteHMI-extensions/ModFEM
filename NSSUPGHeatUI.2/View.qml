@@ -3,7 +3,7 @@ import QtQuick 2.14
 import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.3
 
-import Qt3D.Core 2.5
+import Qt3D.Core 2.14
 import Qt3D.Render 2.14
 import Qt3D.Input 2.5
 import Qt3D.Extras 2.14
@@ -11,9 +11,12 @@ import Qt3D.Extras 2.14
 import Qt.labs.platform 1.1
 import Qt.labs.settings 1.1
 
+import CuteHMI.DataAcquisition 0.0
+import CuteHMI.Services 2.0
+
 import ModFEM.NSSUPGHeat 1.0
 
-import QtMultimedia 5.12	//temp
+import QtMultimedia 5.12	//temp?
 
 Item {
 	anchors.fill: parent
@@ -24,12 +27,38 @@ Item {
 
 		elementData.probes: [
 			ScalarProbe {
-				id: probe1
+				id: temperatureProbe1
 
-				position: probe1Entity.transform.translation
+				position: temperatureProbe1Entity.transform.translation
 				field: "temperature"
+			},
+
+			Vector3Probe {
+				id: velocityProbe1
+
+				position: velocityProbe1Entity.transform.translation
+				field: "velocity"
 			}
 		]
+	}
+
+	Project {
+		id: project
+	}
+
+	Service {
+		id: historyService
+
+		name: "ModFEM History Service"
+
+		HistoryWriter {
+			schema: project.schema
+
+			TagValue {
+				name: "temperatureProbe1"
+				value: temperatureProbe1.value
+			}
+		}
 	}
 
 	Instantiator {
@@ -58,7 +87,7 @@ Item {
 
 			// Temporary label to show probe value
 			Label {
-				text: "Value: " + probe1.value
+				text: "Value: " + temperatureProbe1.value
 			}
 
 			ElementSelectionGroup {
@@ -83,15 +112,15 @@ Item {
 
 					onCurrentIndexChanged: {
 						switch (currentIndex) {
-							case 0:
-								colorMappersInstantiator.delegate = Qt.createComponent("BCColorMappers.qml")
-								break
-							case 1:
-								colorMappersInstantiator.delegate = Qt.createComponent("TemperatureColorMappers.qml")
-								break
-							case 2:
-								colorMappersInstantiator.delegate = Qt.createComponent("PressureColorMappers.qml")
-								break
+						case 0:
+							colorMappersInstantiator.delegate = Qt.createComponent("BCColorMappers.qml")
+							break
+						case 1:
+							colorMappersInstantiator.delegate = Qt.createComponent("TemperatureColorMappers.qml")
+							break
+						case 2:
+							colorMappersInstantiator.delegate = Qt.createComponent("PressureColorMappers.qml")
+							break
 						}
 					}
 				}
@@ -131,9 +160,9 @@ Item {
 				}
 
 				ComboBox {
-					model: ["Elements", "Clip plane", "Probe 1"]
+					model: ["Elements", "Clip plane", "Temperature probe 1", "Velocity probe 1"]
 
-					property var entities: [elementsEntity, clipPlane0Entity, probe1Entity]
+					property var entities: [elementsEntity, clipPlane0Entity, temperatureProbe1Entity, velocityProbe1Entity]
 
 					onCurrentIndexChanged: settingsLayout.transformEntity = entities[currentIndex]
 				}
@@ -191,13 +220,19 @@ Item {
 				Button {
 					text: qsTr("Start")
 
-					onClicked: problem.start()
+					onClicked: {
+						problem.start()
+						ServiceManager.start()
+					}
 				}
 
 				Button {
 					text: qsTr("Stop")
 
-					onClicked: problem.stop()
+					onClicked: {
+						problem.stop()
+						ServiceManager.stop()
+					}
 				}
 
 				Button {
@@ -229,67 +264,90 @@ Item {
 				}
 			}
 
-			VideoOutput {
-//			Rectangle {
+			Rectangle {
 				Layout.fillHeight: true
 				Layout.fillWidth: true
-//				color: "black"
+				color: "black"
 
-					source: camera
+//				VideoOutput {
+//					anchors.fill: parent
 
-					Camera {
-						id: camera
-						// You can adjust various settings in here
+//					source: camera
 
-						deviceId: QtMultimedia.availableCameras[0].deviceId
-					}
+//					Camera {
+//						id: camera
+//						// You can adjust various settings in here
 
-				Scene3D {
-					id: scene3d
+//						deviceId: QtMultimedia.availableCameras[0].deviceId
+//					}
 
-					anchors.fill: parent
+					Scene3D {
+						id: scene3d
 
-					RootEntity {
-						id: rootEntity
+						anchors.fill: parent
 
-						property ShaderData clipPlanesData: ShaderData {
-							property int count: 1
-							property ShaderDataArray planes: ShaderDataArray {
-								ShaderData {
-									property vector4d equation: clipPlane0Entity.equation
+						RootEntity {
+							id: rootEntity
+
+							property ShaderData clipPlanesData: ShaderData {
+								property int count: 1
+								property ShaderDataArray planes: ShaderDataArray {
+									ShaderData {
+										property vector4d equation: clipPlane0Entity.equation
+									}
 								}
 							}
+
+							ClipPlaneEntity {
+								id: clipPlane0Entity
+							}
+
+							ElementsEntity {
+								id: elementsEntity
+
+								elementData: problem.elementData
+								triangleColorMapper: colorMappersInstantiator.triangleColorMapper
+								quadTriangleColorMapper: colorMappersInstantiator.quadTriangleColorMapper
+								nodesEnabled: visibilityGroup.nodesEnabled
+								linesEnabled: visibilityGroup.linesEnabled
+								facesEnabled: visibilityGroup.facesEnabled
+								alpha: visibilityGroup.alpha
+								clipPlanesData: rootEntity.clipPlanesData
+
+								ProbeEntity {
+									id: temperatureProbe1Entity
+
+									transform.translation.x: -5
+								}
+
+								ProbeEntity {
+									id: velocityProbe1Entity
+
+									transform.translation.x: 5
+								}
+
+								ArrowEntity {
+									id: velocity1ArrowEntity
+
+									transform.translation: velocityProbe1Entity.transform.translation
+									vector: velocityProbe1.value
+								}
+							}
+
+							NumberDisplayEntity {
+								display.value: temperatureProbe1.value
+
+								transform.translation: Qt.vector3d(temperatureProbe1Entity.transform.worldMatrix.column(3).x, elementsEntity.maxExtent.y + 2.5, temperatureProbe1Entity.transform.worldMatrix.column(3).z)
+							}
+							NumberDisplayEntity {
+
+								display.value: velocityProbe1.value.length()
+								display.unit: "m/s"
+
+								transform.translation: Qt.vector3d(velocityProbe1Entity.transform.worldMatrix.column(3).x, elementsEntity.maxExtent.y + 2.5, velocityProbe1Entity.transform.worldMatrix.column(3).z)
+							}
 						}
-
-						ClipPlaneEntity {
-							id: clipPlane0Entity
-						}
-
-						ProbeEntity {
-							id: probe1Entity
-						}
-
-						ElementsEntity {
-							id: elementsEntity
-
-							elementData: problem.elementData
-							triangleColorMapper: colorMappersInstantiator.triangleColorMapper
-							quadTriangleColorMapper: colorMappersInstantiator.quadTriangleColorMapper
-							nodesEnabled: visibilityGroup.nodesEnabled
-							linesEnabled: visibilityGroup.linesEnabled
-							facesEnabled: visibilityGroup.facesEnabled
-							alpha: visibilityGroup.alpha
-							clipPlanesData: rootEntity.clipPlanesData
-						}
-
-						NumberDisplayEntity {
-							id: numberDisplayEntity
-
-							display.value: probe1.value
-
-							transform.translation: Qt.vector3d(probe1Entity.transform.translation.x, elementsEntity.maxExtent.y + 2.5, probe1Entity.transform.translation.z)
-						}
-					}
+//					}
 				}
 
 				Row {

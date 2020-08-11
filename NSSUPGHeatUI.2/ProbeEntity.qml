@@ -1,4 +1,4 @@
-import Qt3D.Core 2.0
+import Qt3D.Core 2.14
 import Qt3D.Render 2.14
 import Qt3D.Extras 2.14
 
@@ -13,6 +13,8 @@ Entity {
 		ambient: "red"
 		diffuse: "red"
 		alpha: 1.0
+
+		activeDepthState: DepthTest { depthFunction: DepthTest.Always }
 	}
 
 	SphereMesh {

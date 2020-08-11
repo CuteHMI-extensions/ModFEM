@@ -14,16 +14,6 @@ Entity {
 
 	property alias display: display
 
-	Transform {
-		id: transform
-//						translation: Qt.vector3d( -25, 0, -50)
-//		translation: Qt.vector3d( 0, 0, -5)
-//						scale3D: Qt.vector3d(1000, 1000, 100)
-//						rotation: fromAxisAndAngle(Qt.vector3d(1, 0, 0), 90)
-		rotationX: 90
-		scale: 0.05
-	}
-
 	PlaneMesh {
 		id: mesh
 
@@ -31,6 +21,33 @@ Entity {
 		height: display.height
 		mirrored: true
 		meshResolution: Qt.size(2, 2)
+	}
+
+	Entity {
+		id: frontEntity
+
+		Transform {
+			id: frontTransform
+
+			rotationX: 90
+			scale: 0.05
+		}
+
+		components: [mesh, frontTransform, material]
+	}
+
+	Entity {
+		id: backEntity
+
+		Transform {
+			id: backTransform
+
+			rotationX: 90
+			rotationY: 180
+			scale: 0.05
+		}
+
+		components: [mesh, backTransform, material]
 	}
 
 	TransparentTextureMaterial {
@@ -67,5 +84,9 @@ Entity {
 		}
 	}
 
-	components: [transform, mesh, material]
+	Transform {
+		id: transform
+	}
+
+	components: [frontEntity, backEntity, transform]
 }
