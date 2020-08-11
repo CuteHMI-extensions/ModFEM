@@ -92,7 +92,7 @@ Material {
 						DepthTest {
 							depthFunction: DepthTest.Less
 						},
-						NoDepthMask {},
+//						NoDepthMask {},
 						BlendEquationArguments {
 							sourceRgb: BlendEquationArguments.SourceAlpha
 							sourceAlpha: BlendEquationArguments.SourceAlpha

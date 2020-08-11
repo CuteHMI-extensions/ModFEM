@@ -334,6 +334,10 @@ Item {
 								}
 							}
 
+							CentrifugalFanEntity {
+
+							}
+
 							NumberDisplayEntity {
 								display.value: temperatureProbe1.value
 
