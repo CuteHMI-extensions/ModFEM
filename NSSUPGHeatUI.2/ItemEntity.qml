@@ -14,21 +14,23 @@ Entity {
 
 	property real scale: 0.05
 
+	property bool mirrored: false
+
 	property alias item: scene2d.item
 
 	property alias mouseEnabled: scene2d.mouseEnabled
 
-	PlaneMesh {
-		id: mesh
-
-		width: scene2d.item.width
-		height: scene2d.item.height
-		mirrored: true
-		meshResolution: Qt.size(2, 2)
-	}
-
 	Entity {
 		id: frontEntity
+
+		PlaneMesh {
+			id: frontMesh
+
+			width: scene2d.item.width
+			height: scene2d.item.height
+			mirrored: true
+			meshResolution: Qt.size(2, 2)
+		}
 
 		Transform {
 			id: frontTransform
@@ -37,21 +39,31 @@ Entity {
 			scale: root.scale
 		}
 
-		components: [mesh, frontTransform, material]
+		components: [frontMesh, frontTransform, material]
 	}
 
 	Entity {
 		id: backEntity
+
+
+		PlaneMesh {
+			id: backMesh
+
+			width: scene2d.item.width
+			height: scene2d.item.height
+			mirrored: root.mirrored
+			meshResolution: Qt.size(2, 2)
+		}
 
 		Transform {
 			id: backTransform
 
 			rotationX: 90
 			rotationY: 180
-			scale: root.scale
+			scale: root.mirrored ? root.scale : -root.scale
 		}
 
-		components: [mesh, backTransform, material]
+		components: [backMesh, backTransform, material]
 	}
 
 	TransparentTextureMaterial {

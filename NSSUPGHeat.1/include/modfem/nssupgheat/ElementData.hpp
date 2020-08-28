@@ -44,6 +44,10 @@ class MODFEM_NSSUPGHEAT_API ElementData:
 
 		Q_PROPERTY(double maxPressure READ maxPressure NOTIFY maxPressureChanged)
 
+		Q_PROPERTY(double minVelocityMagnitude READ minVelocityMagnitude NOTIFY minVelocityMagnitudeChanged)
+
+		Q_PROPERTY(double maxVelocityMagnitude READ maxVelocityMagnitude NOTIFY maxVelocityMagnitudeChanged)
+
 		Q_PROPERTY(QQmlListProperty<modfem::nssupgheat::AbstractProbe> probes READ probeList)
 
 		explicit ElementData(QObject * parent = nullptr);
@@ -69,6 +73,10 @@ class MODFEM_NSSUPGHEAT_API ElementData:
 		double minPressure() const;
 
 		double maxPressure() const;
+
+		double minVelocityMagnitude() const;
+
+		double maxVelocityMagnitude() const;
 
 		QQmlListProperty<AbstractProbe> probeList();
 
@@ -111,6 +119,10 @@ class MODFEM_NSSUPGHEAT_API ElementData:
 		void minPressureChanged();
 
 		void maxPressureChanged();
+
+		void minVelocityMagnitudeChanged();
+
+		void maxVelocityMagnitudeChanged();
 
 	private:
 		typedef double freal;	// Field real type.
@@ -170,6 +182,10 @@ class MODFEM_NSSUPGHEAT_API ElementData:
 
 		void maybeSetMaxPressure(double pressure);
 
+		void maybeSetMinVelocityMagnitude(double velocityMagnitude);
+
+		void maybeSetMaxVelocityMagnitude(double velocityMagnitude);
+
 		void clearArrays();
 
 		void reserveArrays();
@@ -220,6 +236,8 @@ class MODFEM_NSSUPGHEAT_API ElementData:
 		template <typename T>
 		void insertScalar(int pos, T scalar,  QByteArray & array);
 
+		freal norm(const std::array<freal, 3> & vector);
+
 		struct Members {
 			int meshId;
 			QVariantMap count;
@@ -252,10 +270,15 @@ class MODFEM_NSSUPGHEAT_API ElementData:
 			QByteArray trianglePressures;
 			QByteArray quadPressures;
 			QByteArray quadTrianglePressures;
+			QByteArray triangleVelocities;
+			QByteArray quadVelocities;
+			QByteArray quadTriangleVelocities;
 			double minTemperature;
 			double maxTemperature;
 			double minPressure;
 			double maxPressure;
+			double minVelocityMagnitude;
+			double maxVelocityMagnitude;
 			ProbeContainer probes;
 			QQmlListProperty<AbstractProbe> probeList;
 			ProbeScalarFieldNodeMap probeScalarFieldNodeMap;
@@ -267,6 +290,8 @@ class MODFEM_NSSUPGHEAT_API ElementData:
 				maxTemperature(std::numeric_limits<double>::lowest()),
 				minPressure(std::numeric_limits<double>::max()),
 				maxPressure(std::numeric_limits<double>::lowest()),
+				minVelocityMagnitude(std::numeric_limits<double>::max()),
+				maxVelocityMagnitude(std::numeric_limits<double>::lowest()),
 				probeList(p_parent, & probes, & ElementData::ProbeListAppend, & ElementData::ProbeListCount, & ElementData::ProbeListAt, & ElementData::ProbeListClear)
 			{
 			}

@@ -3,6 +3,7 @@
 
 #include "internal/common.hpp"
 #include "ElementData.hpp"
+#include "IntegrationData.hpp"
 #include "ScalarFieldNodes.hpp"
 
 #include <QObject>
@@ -36,6 +37,8 @@ class MODFEM_NSSUPGHEAT_API Problem:
 
 		Q_PROPERTY(ElementData * elementData READ elementData NOTIFY elementDataChanged)
 
+		Q_PROPERTY(IntegrationData * integrationData READ integrationData CONSTANT)
+
 		Problem(QObject * parent = nullptr);
 
 		~Problem() override;
@@ -55,6 +58,8 @@ class MODFEM_NSSUPGHEAT_API Problem:
 		int equationCount() const;
 
 		ElementData * elementData() const;
+
+		IntegrationData * integrationData() const;
 
 		Q_INVOKABLE void setDirectoryFromURL(const QUrl & url);
 
@@ -111,6 +116,7 @@ class MODFEM_NSSUPGHEAT_API Problem:
 			int solutionCount;
 			int equationCount;
 			QAtomicInt integrateInterrupt;	///@todo remove?
+			IntegrationData * integrationData;
 			IntegrationThread * integrationThread;
 			ElementData * elementData;
 		};

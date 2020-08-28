@@ -85,11 +85,6 @@ Item {
 		ColumnLayout {
 			Layout.alignment: Qt.AlignTop
 
-			// Temporary label to show probe value
-			Label {
-				text: "Value: " + temperatureProbe1.value
-			}
-
 			ElementSelectionGroup {
 				id: elementSelectionGroup
 
@@ -108,7 +103,7 @@ Item {
 				}
 
 				ComboBox {
-					model: [qsTr("BC"), qsTr("Temperature"), qsTr("Pressure"), qsTr("Velocity magnitude"), qsTr("Velocity X"), qsTr("Velocity Y"), qsTr("Velocity Z")]
+					model: [qsTr("BC"), qsTr("Temperature"), qsTr("Pressure"), qsTr("Velocity magnitude")]
 
 					onCurrentIndexChanged: {
 						switch (currentIndex) {
@@ -120,6 +115,9 @@ Item {
 							break
 						case 2:
 							colorMappersInstantiator.delegate = Qt.createComponent("PressureColorMappers.qml")
+							break
+						case 3:
+							colorMappersInstantiator.delegate = Qt.createComponent("VelocityColorMappers.qml")
 							break
 						}
 					}
@@ -182,85 +180,21 @@ Item {
 		}
 
 		ColumnLayout {
-			RowLayout {
-				Label {
-					text: qsTr("Problem directory: ")
-				}
+			Flow {
+				Layout.fillWidth: true
 
-				TextField {
-					id: directoryTextField
-					text: problem.directory
-					selectByMouse: true
-
-					onEditingFinished: problem.directory = text
-				}
-
-				Button {
-					text: qsTr("Browse...")
-					onClicked: directoryDialog.open()
-				}
-
-				FolderDialog {
-					id: directoryDialog
-					currentFolder: problem.directory
-
-					onAccepted: problem.setDirectoryFromURL(folder)
-				}
-			}
-
-			Row {
 				spacing: 5
 
-				Button {
-					text: qsTr("Init")
-
-					onClicked: problem.init()
+				SimulationGroup {
+					problem: problem
 				}
 
-				Button {
-					text: qsTr("Start")
-
-					onClicked: {
-						problem.start()
-						ServiceManager.start()
-					}
+				ProblemGroup {
+					problem: problem
 				}
 
-				Button {
-					text: qsTr("Stop")
-
-					onClicked: {
-						problem.stop()
-						ServiceManager.stop()
-					}
-				}
-
-				Button {
-					text: qsTr("Solve")
-
-					onClicked: problem.solve()
-				}
-
-				Button {
-					text: qsTr("Update fields")
-
-					onClicked: problem.elementData.updateFields()
-				}
-
-				Button {
-					text: qsTr("Integrate")
-
-					onClicked: problem.integrate()
-				}
-
-				Button {
-					text: qsTr("Write ParaView")
-
-					onClicked: problem.writeParaview()
-				}
-
-				Button {
-					text: qsTr("View entity")
+				ControlsGroup {
+					problem: problem
 				}
 			}
 
@@ -334,9 +268,9 @@ Item {
 								}
 							}
 
-							CentrifugalFanEntity {
+//							CentrifugalFanEntity {
 
-							}
+//							}
 
 							NumberDisplayEntity {
 								display.value: temperatureProbe1.value
@@ -406,6 +340,12 @@ Item {
 			}
 
 			SolutionInfo {
+				Layout.minimumWidth: Math.max(parent.width, Layout.preferredWidth)
+
+				problem: problem
+			}
+
+			SimulationInfo {
 				Layout.minimumWidth: Math.max(parent.width, Layout.preferredWidth)
 
 				problem: problem

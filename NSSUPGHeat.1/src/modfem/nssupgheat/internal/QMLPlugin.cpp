@@ -4,6 +4,8 @@
 
 #include <modfem/nssupgheat/Problem.hpp>
 #include <modfem/nssupgheat/ElementData.hpp>
+#include <modfem/nssupgheat/IntegrationThread.hpp>
+#include <modfem/nssupgheat/IntegrationData.hpp>
 #include <modfem/nssupgheat/AbstractColorMapper.hpp>
 #include <modfem/nssupgheat/PaletteColorMapper.hpp>
 #include <modfem/nssupgheat/HueColorMapper.hpp>
@@ -31,6 +33,8 @@ void QMLPlugin::registerTypes(const char * uri)
 	qmlRegisterUncreatableType<modfem::nssupgheat::AbstractProbe>(uri, MODFEM_NSSUPGHEAT_MAJOR, 0, "AbstractProbe", "Class 'modfem::heat::AbstractProbe' can not be instantiated from QML");
 	qmlRegisterType<modfem::nssupgheat::ScalarProbe>(uri, MODFEM_NSSUPGHEAT_MAJOR, 0, "ScalarProbe");
 	qmlRegisterType<modfem::nssupgheat::Vector3Probe>(uri, MODFEM_NSSUPGHEAT_MAJOR, 0, "Vector3Probe");
+	qmlRegisterUncreatableType<modfem::nssupgheat::IntegrationThread>(uri, MODFEM_NSSUPGHEAT_MAJOR, 0, "IntegrationThread", "Class 'modfem::heat::IntegrationThread' can not be instantiated from QML");
+	qmlRegisterUncreatableType<modfem::nssupgheat::IntegrationData>(uri, MODFEM_NSSUPGHEAT_MAJOR, 0, "IntegrationData", "Class 'modfem::heat::IntegrationData' can not be instantiated from QML");
 }
 
 }

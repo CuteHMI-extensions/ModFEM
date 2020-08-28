@@ -50,7 +50,7 @@ void PaletteColorMapper::updateOutput()
 	while (indicesBytes != input().constEnd()) {
 		int colorIndex = *reinterpret_cast<const int *>(indicesBytes);
 		QColor color = m->palette.value(colorIndex, m->defaultColor).value<QColor>();
-//		CUTEHMI_DEBUG("colorIndex: " << colorIndex << " " << color);
+		CUTEHMI_DEBUG("colorIndex: " << colorIndex << " " << color);
 		float colorVector[3];
 		colorVector[0] = color.redF();
 		colorVector[1] = color.greenF();

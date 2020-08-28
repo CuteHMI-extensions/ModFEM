@@ -134,6 +134,7 @@ Problem::Problem(QObject * parent):
 	0,
 	0,
 	0,
+	new IntegrationData(this),
 	nullptr,
 	new ElementData(this)})
 {
@@ -193,6 +194,11 @@ int Problem::equationCount() const
 ElementData * Problem::elementData() const
 {
 	return m->elementData;
+}
+
+IntegrationData * Problem::integrationData() const
+{
+	return m->integrationData;
 }
 
 void Problem::setDirectoryFromURL(const QUrl & url)
@@ -258,6 +264,8 @@ void Problem::init()
 		setEquationCount(pdr_ctrl_i_params(problemId(), 5));
 
 		m->elementData->init(meshId());
+
+		m->integrationData->setRequestedTimeStep(pdv_ns_supg_problem.time.cur_dtime);
 	}
 
 //	pdv_ns_supg_problem.time.final_step = 1;	// TEMP force single step
@@ -384,7 +392,7 @@ void Problem::start()
 		m->integrationThread->wait();
 		m->integrationThread->deleteLater();
 	}
-	m->integrationThread = new IntegrationThread(m->interactiveInput, m->interactiveOutput, directory());
+	m->integrationThread = new IntegrationThread(m->interactiveInput, m->interactiveOutput, directory(), integrationData());
 	connect(m->integrationThread, & IntegrationThread::iterationFinished, m->elementData, qOverload<>(& ElementData::updateFields));
 	connect(m->integrationThread, & IntegrationThread::iterationFinished, m->elementData, & ElementData::updateProbes);
 	m->integrationThread->start();
@@ -1366,7 +1374,7 @@ void Problem::nsSupgHeatIntegrate(char * Work_dir, FILE * Interactive_input, FIL
 		CUTEHMI_DEBUG("Difference between real time and simulation time: " << timeDiff);
 		time_ns_supg->cur_dtime += timeDiff;
 
-		time_ns_supg->cur_dtime = std::max(time_ns_supg->cur_dtime, minCurDTime);
+		time_ns_supg->cur_dtime = std::max(time_ns_supg->cur_dtime, minCurDTime);	// Uncomment
 		time_heat->cur_dtime = time_ns_supg->cur_dtime;
 		CUTEHMI_DEBUG("Setting up new cur_dtime: " << time_ns_supg->cur_dtime);
 //		if (timeDiff > 0) {

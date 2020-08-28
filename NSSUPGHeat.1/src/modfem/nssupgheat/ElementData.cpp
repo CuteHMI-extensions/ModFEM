@@ -6,6 +6,8 @@
 #include <modfem/pd_heat/pdh_heat_problem.h>
 #include <modfem/pd_ns_supg_heat/pdh_ns_supg_heat.h>
 
+#include <cmath>
+
 namespace modfem {
 namespace nssupgheat {
 
@@ -76,6 +78,16 @@ double ElementData::minPressure() const
 double ElementData::maxPressure() const
 {
 	return m->maxPressure;
+}
+
+double ElementData::minVelocityMagnitude() const
+{
+	return m->minVelocityMagnitude;
+}
+
+double ElementData::maxVelocityMagnitude() const
+{
+	return m->maxVelocityMagnitude;
 }
 
 QQmlListProperty<AbstractProbe> ElementData::probeList()
@@ -165,6 +177,8 @@ void ElementData::updateFields(int elementId)
 			m->nodeVelocities[elNodes[nodeIt]][0] = elDofs[dofCtr++];
 			m->nodeVelocities[elNodes[nodeIt]][1] = elDofs[dofCtr++];
 			m->nodeVelocities[elNodes[nodeIt]][2] = elDofs[dofCtr++];
+			maybeSetMinVelocityMagnitude(norm(m->nodeVelocities[elNodes[nodeIt]]));
+			maybeSetMaxVelocityMagnitude(norm(m->nodeVelocities[elNodes[nodeIt]]));
 			m->nodePressures[elNodes[nodeIt]] = elDofs[dofCtr++];
 			maybeSetMinPressure(static_cast<double>(m->nodePressures[elNodes[nodeIt]]));
 			maybeSetMaxPressure(static_cast<double>(m->nodePressures[elNodes[nodeIt]]));
@@ -253,6 +267,8 @@ void ElementData::clearRecords()
 	m->maxTemperature = std::numeric_limits<double>::min();
 	m->minPressure = std::numeric_limits<double>::max();
 	m->maxPressure = std::numeric_limits<double>::min();
+	m->minVelocityMagnitude = std::numeric_limits<double>::max();
+	m->maxVelocityMagnitude = std::numeric_limits<double>::min();
 }
 
 void ElementData::clearProbes()
@@ -292,6 +308,22 @@ void ElementData::maybeSetMaxPressure(double pressure)
 	if (m->maxPressure < pressure) {
 		m->maxPressure = pressure;
 		emit maxPressureChanged();
+	}
+}
+
+void ElementData::maybeSetMinVelocityMagnitude(double velocityMagnitude)
+{
+	if (m->minVelocityMagnitude > velocityMagnitude) {
+		m->minVelocityMagnitude = velocityMagnitude;
+		emit minVelocityMagnitudeChanged();
+	}
+}
+
+void ElementData::maybeSetMaxVelocityMagnitude(double velocityMagnitude)
+{
+	if (m->maxVelocityMagnitude < velocityMagnitude) {
+		m->maxVelocityMagnitude = velocityMagnitude;
+		emit maxVelocityMagnitudeChanged();
 	}
 }
 
@@ -341,6 +373,10 @@ void ElementData::reserveArrays()
 	m->trianglePressures.reserve(m->count["triangles"].toInt() * 3 * FREAL_SIZE);
 	m->quadPressures.reserve(m->count["quads"].toInt() * 4 * FREAL_SIZE);
 	m->quadTrianglePressures.reserve(m->count["quads"].toInt() * 6 * FREAL_SIZE);
+
+	m->triangleVelocities.reserve(m->count["triangles"].toInt() * 3 * FREAL_SIZE);
+	m->quadVelocities.reserve(m->count["quads"].toInt() * 4 * FREAL_SIZE);
+	m->quadTriangleVelocities.reserve(m->count["quads"].toInt() * 6 * FREAL_SIZE);
 }
 
 void ElementData::updateArrays(int meshId)
@@ -543,6 +579,7 @@ void ElementData::assignTriangleFields(int meshId, int faceId)
 	for (int i = 1; i <= 3; i++) {
 		appendScalar(m->nodeTemperatures[indices[i]], m->triangleTemperatures);
 		appendScalar(m->nodePressures[indices[i]], m->trianglePressures);
+		appendScalar(norm(m->nodeVelocities[indices[i]]), m->triangleVelocities);
 	}
 }
 
@@ -554,6 +591,7 @@ void ElementData::assignQuadFields(int meshId, int faceId)
 	for (int i = 1; i <= 4; i++) {
 		appendScalar(m->nodeTemperatures[indices[i]], m->quadTemperatures);
 		appendScalar(m->nodePressures[indices[i]], m->quadPressures);
+		appendScalar(norm(m->nodeVelocities[indices[i]]), m->quadVelocities);
 	}
 }
 
@@ -575,18 +613,28 @@ void ElementData::assignQuadTriangleFields(int meshId, int faceId)
 	appendScalar(m->nodePressures[indices[4]], m->quadTrianglePressures);
 	appendScalar(m->nodePressures[indices[3]], m->quadTrianglePressures);
 	appendScalar(m->nodePressures[indices[1]], m->quadTrianglePressures);
+
+	appendScalar(norm(m->nodeVelocities[indices[1]]), m->quadTriangleVelocities);
+	appendScalar(norm(m->nodeVelocities[indices[2]]), m->quadTriangleVelocities);
+	appendScalar(norm(m->nodeVelocities[indices[3]]), m->quadTriangleVelocities);
+	appendScalar(norm(m->nodeVelocities[indices[4]]), m->quadTriangleVelocities);
+	appendScalar(norm(m->nodeVelocities[indices[3]]), m->quadTriangleVelocities);
+	appendScalar(norm(m->nodeVelocities[indices[1]]), m->quadTriangleVelocities);
 }
 
 void ElementData::updateFieldProperties()
 {
 	m->triangleFields["temperatures"] = m->triangleTemperatures;
 	m->triangleFields["pressures"] = m->trianglePressures;
+	m->triangleFields["velocities"] = m->triangleVelocities;
 	emit triangleFieldsChanged();
 
 	m->quadFields["temperatures"] = m->quadTemperatures;
 	m->quadFields["triangleTemperatures"] = m->quadTriangleTemperatures;
 	m->quadFields["pressures"] = m->quadPressures;
 	m->quadFields["trianglePressures"] = m->quadTrianglePressures;
+	m->quadFields["velocities"] = m->quadVelocities;
+	m->quadFields["triangleVelocities"] = m->quadTriangleVelocities;
 	emit quadFieldsChanged();
 }
 
@@ -598,6 +646,9 @@ void ElementData::clearFieldArrays()
 	m->trianglePressures.clear();
 	m->quadPressures.clear();
 	m->quadTrianglePressures.clear();
+	m->triangleVelocities.clear();
+	m->quadVelocities.clear();
+	m->quadTriangleVelocities.clear();
 }
 
 void ElementData::updateProperties()
@@ -745,6 +796,11 @@ void ElementData::findClosestNode(AbstractProbe * probe)
 		} else
 			CUTEHMI_CRITICAL("Unrecognized field name '" << probe->field() << "'.");
 	}
+}
+
+ElementData::freal ElementData::norm(const std::array<freal, 3> & vector)
+{
+	return std::sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
 }
 
 template<std::size_t DIM, typename T>

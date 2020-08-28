@@ -2,6 +2,7 @@
 #define INTEGRATIONTHREAD_HPP
 
 #include "internal/common.hpp"
+#include "IntegrationData.hpp"
 
 #include <QThread>
 
@@ -14,12 +15,18 @@ class MODFEM_NSSUPGHEAT_API IntegrationThread:
 		Q_OBJECT
 
 	public:
-		IntegrationThread(FILE * interactiveInput, FILE * interactiveOutput, const QString & workingDirectory, QObject * parent = nullptr);
+		IntegrationThread(FILE * interactiveInput, FILE * interactiveOutput, const QString & workingDirectory, IntegrationData * integrationData, QObject * parent = nullptr);
 
 		void run() override;
 
 	signals:
 		void iterationFinished();
+
+		void currentTimeStepChanged(double currentTimeStep);
+
+		void simulationTimeChanged(double simulationTime);
+
+		void realTimeChanged(double realTime);
 
 	private:
 		void integrate();
@@ -32,6 +39,7 @@ class MODFEM_NSSUPGHEAT_API IntegrationThread:
 			FILE * interactiveInput;
 			FILE * interactiveOutput;
 			QString workingDirectory;
+			IntegrationData * integrationData;
 		};
 
 		cutehmi::MPtr<Members> m;

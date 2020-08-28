@@ -58,13 +58,17 @@
 namespace modfem {
 namespace nssupgheat {
 
-IntegrationThread::IntegrationThread(FILE * interactiveInput, FILE * interactiveOutput, const QString & workingDirectory, QObject * parent):
+IntegrationThread::IntegrationThread(FILE * interactiveInput, FILE * interactiveOutput, const QString & workingDirectory, IntegrationData * integrationData, QObject * parent):
 	QThread(parent),
 	m(new Members{
 	interactiveInput,
 	interactiveOutput,
-	workingDirectory})
+	workingDirectory,
+	integrationData})
 {
+	connect(this, & IntegrationThread::currentTimeStepChanged, integrationData, & IntegrationData::setCurrentTimeStep);
+	connect(this, & IntegrationThread::realTimeChanged, integrationData, & IntegrationData::setRealTime);
+	connect(this, & IntegrationThread::simulationTimeChanged, integrationData, & IntegrationData::setSimulationTime);
 }
 
 void IntegrationThread::run()
@@ -328,12 +332,11 @@ void IntegrationThread::nsSupgHeatIntegrate(char * Work_dir, FILE * Interactive_
 	//mmr_copyMESH(1);
 	//mmr_init_all_change(2);
 	// Writing out step '0'.
-	pdr_ns_supg_heat_write_paraview(Work_dir,
-			Interactive_input, Interactive_output);
+	pdr_ns_supg_heat_write_paraview(Work_dir, Interactive_input, Interactive_output);
 
 	QElapsedTimer realTime;
 	double simulationTime = 0.0;
-	double minCurDTime = time_ns_supg->cur_dtime;
+	time_ns_supg->cur_dtime = m->integrationData->requestedTimeStep();
 	realTime.start();
 	/* start loop over time steps */
 	while (utv_SIGINT_not_caught && !isInterruptionRequested()) {
@@ -347,7 +350,7 @@ void IntegrationThread::nsSupgHeatIntegrate(char * Work_dir, FILE * Interactive_
 		previous_un_error_heat = sol_norm_un_ns_supg;
 		previous_un_error_ns_supg = sol_norm_un_heat;
 
-		//(ileWarstw,obecny_krok,od_krok,ileKrok,minPoprawy,px0,py0,pz0,px1,py1,pz1,endX,endY,endZ);
+		//(ileWarstw,obecny_krok,od_krok,ileKrok,pdv_ns_supg_problem.timenPoprawy,px0,py0,pz0,px1,py1,pz1,endX,endY,endZ);
 		//	mmr_test_mesh_motion(1,time_ns_supg->cur_step,3,30,0.005,  0.5,0.5,0.0,   0.7,0.7,1.0,   0.6,0.6,0.0);
 
 
@@ -787,11 +790,15 @@ void IntegrationThread::nsSupgHeatIntegrate(char * Work_dir, FILE * Interactive_
 		simulationTime += time_ns_supg->cur_dtime;
 		double timeDiff = static_cast<double>(realTime.elapsed() / 1000.0) - simulationTime;
 		CUTEHMI_DEBUG("Difference between real time and simulation time: " << timeDiff);
-		time_ns_supg->cur_dtime += timeDiff;
+		if (m->integrationData->realTimeSimulation())
+			time_ns_supg->cur_dtime += timeDiff;
 
-		time_ns_supg->cur_dtime = std::max(time_ns_supg->cur_dtime, minCurDTime);
+		time_ns_supg->cur_dtime = std::max(time_ns_supg->cur_dtime, m->integrationData->requestedTimeStep());
 		time_heat->cur_dtime = time_ns_supg->cur_dtime;
 		CUTEHMI_DEBUG("Setting up new cur_dtime: " << time_ns_supg->cur_dtime);
+		emit currentTimeStepChanged(time_ns_supg->cur_dtime);
+		emit simulationTimeChanged(simulationTime);
+		emit realTimeChanged(simulationTime + timeDiff);
 
 		emit iterationFinished();
 	}  //end loop over timesteps

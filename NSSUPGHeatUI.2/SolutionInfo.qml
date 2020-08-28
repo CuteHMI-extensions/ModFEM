@@ -25,5 +25,13 @@ GroupBox {
 		Label {
 			text: qsTr("Min pressure: ") + problem.elementData.minPressure
 		}
+
+		Label {
+			text: qsTr("Max velocity magnitude: ") + problem.elementData.maxVelocityMagnitude
+		}
+
+		Label {
+			text: qsTr("Min velocity magnitude: ") + problem.elementData.minVelocityMagnitude
+		}
 	}
 }

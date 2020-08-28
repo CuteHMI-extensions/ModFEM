@@ -6,16 +6,16 @@ QtObject {
 	property ElementData elementData
 
 	property AbstractColorMapper triangle: HueColorMapper {
-		valueBegin: -65.0
-		valueEnd: 300
-		input: elementData.triangleFields.temperatures ? elementData.triangleFields.temperatures : new ArrayBuffer
+		valueBegin: 0.0
+		valueEnd: 10
+		input: elementData.triangleFields.velocities ? elementData.triangleFields.velocities : new ArrayBuffer
 		inputType: HueColorMapper.INPUT_DOUBLE
 	}
 
 	property AbstractColorMapper quadTriangle: HueColorMapper {
-		valueBegin: -65.0
-		valueEnd: 300
-		input: elementData.quadFields.triangleTemperatures ? elementData.quadFields.triangleTemperatures : new ArrayBuffer
+		valueBegin: 0.0
+		valueEnd: 10
+		input: elementData.quadFields.triangleVelocities ? elementData.quadFields.triangleVelocities : new ArrayBuffer
 		inputType: HueColorMapper.INPUT_DOUBLE
 	}
 }
