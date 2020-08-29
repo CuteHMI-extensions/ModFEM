@@ -270,9 +270,9 @@ class MODFEM_NSSUPGHEAT_API ElementData:
 			QByteArray trianglePressures;
 			QByteArray quadPressures;
 			QByteArray quadTrianglePressures;
-			QByteArray triangleVelocities;
+			QByteArray triangleVelocityMagnitudes;
 			QByteArray quadVelocities;
-			QByteArray quadTriangleVelocities;
+			QByteArray quadTriangleVelocityMagnitudes;
 			double minTemperature;
 			double maxTemperature;
 			double minPressure;

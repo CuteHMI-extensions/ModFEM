@@ -374,9 +374,9 @@ void ElementData::reserveArrays()
 	m->quadPressures.reserve(m->count["quads"].toInt() * 4 * FREAL_SIZE);
 	m->quadTrianglePressures.reserve(m->count["quads"].toInt() * 6 * FREAL_SIZE);
 
-	m->triangleVelocities.reserve(m->count["triangles"].toInt() * 3 * FREAL_SIZE);
+	m->triangleVelocityMagnitudes.reserve(m->count["triangles"].toInt() * 3 * FREAL_SIZE);
 	m->quadVelocities.reserve(m->count["quads"].toInt() * 4 * FREAL_SIZE);
-	m->quadTriangleVelocities.reserve(m->count["quads"].toInt() * 6 * FREAL_SIZE);
+	m->quadTriangleVelocityMagnitudes.reserve(m->count["quads"].toInt() * 6 * FREAL_SIZE);
 }
 
 void ElementData::updateArrays(int meshId)
@@ -579,7 +579,7 @@ void ElementData::assignTriangleFields(int meshId, int faceId)
 	for (int i = 1; i <= 3; i++) {
 		appendScalar(m->nodeTemperatures[indices[i]], m->triangleTemperatures);
 		appendScalar(m->nodePressures[indices[i]], m->trianglePressures);
-		appendScalar(norm(m->nodeVelocities[indices[i]]), m->triangleVelocities);
+		appendScalar(norm(m->nodeVelocities[indices[i]]), m->triangleVelocityMagnitudes);
 	}
 }
 
@@ -614,27 +614,27 @@ void ElementData::assignQuadTriangleFields(int meshId, int faceId)
 	appendScalar(m->nodePressures[indices[3]], m->quadTrianglePressures);
 	appendScalar(m->nodePressures[indices[1]], m->quadTrianglePressures);
 
-	appendScalar(norm(m->nodeVelocities[indices[1]]), m->quadTriangleVelocities);
-	appendScalar(norm(m->nodeVelocities[indices[2]]), m->quadTriangleVelocities);
-	appendScalar(norm(m->nodeVelocities[indices[3]]), m->quadTriangleVelocities);
-	appendScalar(norm(m->nodeVelocities[indices[4]]), m->quadTriangleVelocities);
-	appendScalar(norm(m->nodeVelocities[indices[3]]), m->quadTriangleVelocities);
-	appendScalar(norm(m->nodeVelocities[indices[1]]), m->quadTriangleVelocities);
+	appendScalar(norm(m->nodeVelocities[indices[1]]), m->quadTriangleVelocityMagnitudes);
+	appendScalar(norm(m->nodeVelocities[indices[2]]), m->quadTriangleVelocityMagnitudes);
+	appendScalar(norm(m->nodeVelocities[indices[3]]), m->quadTriangleVelocityMagnitudes);
+	appendScalar(norm(m->nodeVelocities[indices[4]]), m->quadTriangleVelocityMagnitudes);
+	appendScalar(norm(m->nodeVelocities[indices[3]]), m->quadTriangleVelocityMagnitudes);
+	appendScalar(norm(m->nodeVelocities[indices[1]]), m->quadTriangleVelocityMagnitudes);
 }
 
 void ElementData::updateFieldProperties()
 {
 	m->triangleFields["temperatures"] = m->triangleTemperatures;
 	m->triangleFields["pressures"] = m->trianglePressures;
-	m->triangleFields["velocities"] = m->triangleVelocities;
+	m->triangleFields["velocityMagnitudes"] = m->triangleVelocityMagnitudes;
 	emit triangleFieldsChanged();
 
 	m->quadFields["temperatures"] = m->quadTemperatures;
 	m->quadFields["triangleTemperatures"] = m->quadTriangleTemperatures;
 	m->quadFields["pressures"] = m->quadPressures;
 	m->quadFields["trianglePressures"] = m->quadTrianglePressures;
-	m->quadFields["velocities"] = m->quadVelocities;
-	m->quadFields["triangleVelocities"] = m->quadTriangleVelocities;
+	m->quadFields["velocityMagnitudes"] = m->quadVelocities;
+	m->quadFields["triangleVelocityMagnitudes"] = m->quadTriangleVelocityMagnitudes;
 	emit quadFieldsChanged();
 }
 
@@ -646,9 +646,9 @@ void ElementData::clearFieldArrays()
 	m->trianglePressures.clear();
 	m->quadPressures.clear();
 	m->quadTrianglePressures.clear();
-	m->triangleVelocities.clear();
+	m->triangleVelocityMagnitudes.clear();
 	m->quadVelocities.clear();
-	m->quadTriangleVelocities.clear();
+	m->quadTriangleVelocityMagnitudes.clear();
 }
 
 void ElementData::updateProperties()
