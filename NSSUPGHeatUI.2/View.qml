@@ -46,20 +46,20 @@ Item {
 		id: project
 	}
 
-	Service {
-		id: historyService
+//	Service {
+//		id: historyService
 
-		name: "ModFEM History Service"
+//		name: "ModFEM History Service"
 
-		HistoryWriter {
-			schema: project.schema
+//		HistoryWriter {
+//			schema: project.schema
 
-			TagValue {
-				name: "temperatureProbe1"
-				value: temperatureProbe1.value
-			}
-		}
-	}
+//			TagValue {
+//				name: "temperatureProbe1"
+//				value: temperatureProbe1.value
+//			}
+//		}
+//	}
 
 	Instantiator {
 		id: colorMappersInstantiator

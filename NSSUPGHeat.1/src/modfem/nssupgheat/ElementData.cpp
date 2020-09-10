@@ -160,11 +160,9 @@ void ElementData::updateFields(int elementId)
 	int nodeCount = mmr_el_node_coor(m->meshId, elementId, elNodes, NULL);
 	int dofCtr = 0;
 	for (int nodeIt = 1; nodeIt <= nodeCount; nodeIt++) {
-		for (int dofIt = 0; dofIt < solutionCount; dofIt++) {
-			m->nodeTemperatures[elNodes[nodeIt]] = elDofs[dofCtr++];
-			maybeSetMinTemperature(static_cast<double>(m->nodeTemperatures[elNodes[nodeIt]]));
-			maybeSetMaxTemperature(static_cast<double>(m->nodeTemperatures[elNodes[nodeIt]]));
-		}
+		m->nodeTemperatures[elNodes[nodeIt]] = elDofs[dofCtr++];
+		maybeSetMinTemperature(static_cast<double>(m->nodeTemperatures[elNodes[nodeIt]]));
+		maybeSetMaxTemperature(static_cast<double>(m->nodeTemperatures[elNodes[nodeIt]]));
 	}
 
 	fieldId = pdv_ns_supg_problem.ctrl.field_id;
@@ -173,16 +171,14 @@ void ElementData::updateFields(int elementId)
 	nodeCount = mmr_el_node_coor(m->meshId, elementId, elNodes, NULL);
 	dofCtr = 0;
 	for (int nodeIt = 1; nodeIt <= nodeCount; nodeIt++) {
-		for (int dofIt = 0; dofIt < solutionCount; dofIt++) {
-			m->nodeVelocities[elNodes[nodeIt]][0] = elDofs[dofCtr++];
-			m->nodeVelocities[elNodes[nodeIt]][1] = elDofs[dofCtr++];
-			m->nodeVelocities[elNodes[nodeIt]][2] = elDofs[dofCtr++];
-			maybeSetMinVelocityMagnitude(norm(m->nodeVelocities[elNodes[nodeIt]]));
-			maybeSetMaxVelocityMagnitude(norm(m->nodeVelocities[elNodes[nodeIt]]));
-			m->nodePressures[elNodes[nodeIt]] = elDofs[dofCtr++];
-			maybeSetMinPressure(static_cast<double>(m->nodePressures[elNodes[nodeIt]]));
-			maybeSetMaxPressure(static_cast<double>(m->nodePressures[elNodes[nodeIt]]));
-		}
+		m->nodeVelocities[elNodes[nodeIt]][0] = elDofs[dofCtr++];
+		m->nodeVelocities[elNodes[nodeIt]][1] = elDofs[dofCtr++];
+		m->nodeVelocities[elNodes[nodeIt]][2] = elDofs[dofCtr++];
+		maybeSetMinVelocityMagnitude(norm(m->nodeVelocities[elNodes[nodeIt]]));
+		maybeSetMaxVelocityMagnitude(norm(m->nodeVelocities[elNodes[nodeIt]]));
+		m->nodePressures[elNodes[nodeIt]] = elDofs[dofCtr++];
+		maybeSetMinPressure(static_cast<double>(m->nodePressures[elNodes[nodeIt]]));
+		maybeSetMaxPressure(static_cast<double>(m->nodePressures[elNodes[nodeIt]]));
 	}
 }
 
