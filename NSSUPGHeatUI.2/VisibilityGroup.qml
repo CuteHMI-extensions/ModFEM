@@ -13,6 +13,8 @@ GroupBox {
 
 	property alias facesEnabled: facesCheckbox.checked
 
+	property alias capsEnabled: capsCheckbox.checked
+
 	property alias alpha: alphaSlider.value
 
 	Column {
@@ -35,6 +37,13 @@ GroupBox {
 
 			checked: true
 			text: qsTr("Faces")
+		}
+
+		CheckBox {
+			id: capsCheckbox
+
+			checked: false
+			text: qsTr("Caps")
 		}
 
 		RowLayout {

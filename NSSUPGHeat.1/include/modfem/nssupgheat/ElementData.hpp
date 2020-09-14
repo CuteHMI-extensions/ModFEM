@@ -36,6 +36,8 @@ class MODFEM_NSSUPGHEAT_API ElementData:
 		// Note: GL_QUADS have been removed from OpenGL, so quadFields offer 'triangleTemperatures' mapping.
 		Q_PROPERTY(QVariantMap quadFields READ quadFields NOTIFY quadFieldsChanged)
 
+		Q_PROPERTY(QVariantMap caps READ caps NOTIFY capsChanged)
+
 		Q_PROPERTY(double minTemperature READ minTemperature NOTIFY minTemperatureChanged)
 
 		Q_PROPERTY(double maxTemperature READ maxTemperature NOTIFY maxTemperatureChanged)
@@ -65,6 +67,8 @@ class MODFEM_NSSUPGHEAT_API ElementData:
 		QVariantMap triangleFields() const;
 
 		QVariantMap quadFields() const;
+
+		QVariantMap caps() const;
 
 		double minTemperature() const;
 
@@ -97,6 +101,8 @@ class MODFEM_NSSUPGHEAT_API ElementData:
 
 		void updateProbes();
 
+		void clip(const QVector4D & plane);
+
 	signals:
 		void countChanged();
 
@@ -106,11 +112,15 @@ class MODFEM_NSSUPGHEAT_API ElementData:
 
 		void quadsChanged();
 
+		void capsChanged();
+
 		void linesChanged();
 
 		void triangleFieldsChanged();
 
 		void quadFieldsChanged();
+
+		void capFieldsChanged();
 
 		void minTemperatureChanged();
 
@@ -208,7 +218,11 @@ class MODFEM_NSSUPGHEAT_API ElementData:
 
 		void updateFieldProperties();
 
+		void updateCapFieldProperties();
+
 		void clearFieldArrays();
+
+		void clearCapFieldArrays();
 
 		void updateProperties();
 
@@ -223,6 +237,8 @@ class MODFEM_NSSUPGHEAT_API ElementData:
 
 		template <std::size_t DIM, typename T>
 		void appendAsRealVector(T * vector,  QByteArray & array);
+
+		void appendAsRealVector(const QVector3D & vector,  QByteArray & array);
 
 		template <typename T>
 		void appendScalar(T scalar,  QByteArray & array);
@@ -247,6 +263,10 @@ class MODFEM_NSSUPGHEAT_API ElementData:
 			QVariantMap lines;
 			QVariantMap triangleFields;
 			QVariantMap quadFields;
+			QVariantMap caps;
+			QVariantMap capFields;
+			QByteArray capsCoords;
+			QByteArray capsNormals;
 			QByteArray nodeCoords;
 			QByteArray lineCoords;
 			QByteArray triangleCoords;
@@ -267,12 +287,15 @@ class MODFEM_NSSUPGHEAT_API ElementData:
 			QByteArray triangleTemperatures;
 			QByteArray quadTemperatures;
 			QByteArray quadTriangleTemperatures;
+			QByteArray capTemperatures;
 			QByteArray trianglePressures;
 			QByteArray quadPressures;
 			QByteArray quadTrianglePressures;
+			QByteArray capPressures;
 			QByteArray triangleVelocityMagnitudes;
 			QByteArray quadVelocities;
 			QByteArray quadTriangleVelocityMagnitudes;
+			QByteArray capVelocityMagnitudes;
 			double minTemperature;
 			double maxTemperature;
 			double minPressure;

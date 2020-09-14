@@ -93,6 +93,8 @@ Item {
 
 			VisibilityGroup {
 				id: visibilityGroup
+
+				onCapsEnabledChanged: if (problem.meshId && capsEnabled) problem.elementData.clip(clipPlane0Entity.equation)
 			}
 
 			GridLayout {
@@ -234,6 +236,8 @@ Item {
 
 							ClipPlaneEntity {
 								id: clipPlane0Entity
+
+								onEquationChanged: if (problem.meshId && visibilityGroup.capsEnabled) problem.elementData.clip(equation)
 							}
 
 							ElementsEntity {
@@ -245,6 +249,7 @@ Item {
 								nodesEnabled: visibilityGroup.nodesEnabled
 								linesEnabled: visibilityGroup.linesEnabled
 								facesEnabled: visibilityGroup.facesEnabled
+								capsEnabled:  visibilityGroup.capsEnabled
 								alpha: visibilityGroup.alpha
 								clipPlanesData: rootEntity.clipPlanesData
 

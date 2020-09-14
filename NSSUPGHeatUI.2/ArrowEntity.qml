@@ -46,6 +46,8 @@ Entity {
 			ambient: "red"
 			diffuse: "red"
 			alpha: 1.0
+
+			activeDepthState: DepthTest { depthFunction: DepthTest.Always }
 		}
 
 		Entity {
@@ -56,8 +58,6 @@ Entity {
 
 				length: vector.length() * lengthMultiplier
 				radius: root.radius
-
-//				onLengthChanged: console.log(length)
 			}
 
 			components: [cylinder, material]

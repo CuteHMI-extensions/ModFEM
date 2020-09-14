@@ -20,6 +20,8 @@ Entity {
 
 	property bool facesEnabled: true
 
+	property bool capsEnabled: true
+
 	property real alpha: 0.3
 
 	property alias transform: transform
@@ -64,6 +66,14 @@ Entity {
 		cullFace: CullFace {
 			mode: CullFace.NoCulling
 		}
+	}
+
+	PhongMaterial {
+		id: capsMaterial
+
+		ambient: "red"
+		diffuse: "red"
+//		alpha: root.alpha
 	}
 
 	Transform {
@@ -380,6 +390,67 @@ Entity {
 		}
 
 		components: [triangleRenderer, faceMaterial]
+	}
+
+	Entity {
+		id: capsEntity
+
+		enabled: root.capsEnabled
+
+		Entity {
+			GeometryRenderer {
+				id: capTrianglesRenderer
+
+				primitiveType: GeometryRenderer.Triangles
+				instanceCount: 1
+				geometry: Geometry {
+					Attribute {
+						name: defaultNormalAttributeName
+						attributeType: Attribute.VertexAttribute
+						vertexBaseType: Attribute.Float
+						vertexSize: 3
+						byteOffset: 0
+						byteStride: vertexSize * Float32Array.BYTES_PER_ELEMENT
+						count: elementData.caps.count * 3			// 3 vertices per triangle.
+						buffer: Buffer {
+							data: elementData.caps.normals
+						}
+					}
+
+					Attribute {
+						name: defaultColorAttributeName
+						attributeType: Attribute.VertexAttribute
+						vertexBaseType: Attribute.Float
+						vertexSize: 3
+						byteOffset: 0
+						byteStride: vertexSize * Float32Array.BYTES_PER_ELEMENT
+//						count: trianglesPaletteColorMapper.count
+//						count: triangleTemperaturesColorMapper.count
+						count: triangleColorMapper.count
+						buffer: Buffer {
+							data: triangleColorMapper.output
+//							data: triangleTemperaturesColorMapper.output
+//							data: trianglesPaletteColorMapper.output
+						}
+					}
+
+					Attribute {
+						name: defaultPositionAttributeName
+						attributeType: Attribute.VertexAttribute
+						vertexBaseType: Attribute.Float
+						vertexSize: 3
+						byteOffset: 0
+						byteStride: vertexSize * Float32Array.BYTES_PER_ELEMENT
+						count: elementData.caps.count * 3		// 3 vertices per triangle.
+						buffer: Buffer {
+							data: elementData.caps.coords
+						}
+					}
+				}
+			}
+		}
+
+		components: [capTrianglesRenderer, capsMaterial]
 	}
 
 	components: [transform]

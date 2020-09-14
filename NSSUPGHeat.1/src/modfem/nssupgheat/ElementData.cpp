@@ -6,6 +6,8 @@
 #include <modfem/pd_heat/pdh_heat_problem.h>
 #include <modfem/pd_ns_supg_heat/pdh_ns_supg_heat.h>
 
+#include <QVector4D>
+
 #include <cmath>
 
 namespace modfem {
@@ -58,6 +60,11 @@ QVariantMap ElementData::triangleFields() const
 QVariantMap ElementData::quadFields() const
 {
 	return m->quadFields;
+}
+
+QVariantMap ElementData::caps() const
+{
+	return m->caps;
 }
 
 double ElementData::minTemperature() const
@@ -226,6 +233,109 @@ void ElementData::updateProbes()
 		std::array<freal, 3> value = container->at(it.value().second);
 		it.key()->setValue(QVector3D(static_cast<float>(value[0]), static_cast<float>(value[1]), static_cast<float>(value[2])));
 	}
+}
+
+void ElementData::clip(const QVector4D & plane)
+{
+	static constexpr int MAX_EDGES = 13;
+
+	if (!m->meshId) {
+		CUTEHMI_WARNING("Mesh not initialized.");
+		return;
+	}
+
+	m->capsCoords.clear();
+
+	QVector3D pn(-plane);	// Invert plane normal.
+	int elNodes[MMC_MAXELVNO + 1] = {0};
+	double coords[3];
+	int elementId = mmr_get_next_act_elem(m->meshId, 0);
+	while (elementId != 0) {
+		int nodeCount = mmr_el_node_coor(m->meshId, elementId, elNodes, NULL);
+		QVector<QVector3D> intersections;
+
+		int below = 0;
+		int coplanar = 0;
+		for (int nodeIt = 1; nodeIt <= nodeCount; nodeIt++) {
+			mmr_node_coor(m->meshId, elNodes[nodeIt], coords);
+			double nodeDistance = QVector3D::dotProduct(QVector3D(coords[0], coords[1], coords[2]), pn);
+			if (nodeDistance < plane.w())
+				below++;
+			if (nodeDistance == plane.w())	// Very rare scenario, no fuzzy compare needed.
+				coplanar++;
+		}
+
+		// One or more nodes must be below the plane and other nodes should be above or at least 3 nodes are coplanar.
+		if ((below && below < nodeCount) || coplanar >= 3) {
+			// Check which edges intersect the plane.
+			int edges[MAX_EDGES];
+			int edgeCount = mmr_el_edges(m->meshId, elementId, edges);
+			CUTEHMI_ASSERT(edgeCount <= MAX_EDGES, "maximal number of edges exceeded");
+			for (int i = 1; i <= edgeCount; i++) {
+				int edgeNodes[2];
+				double node0Coords[3];
+				double node1Coords[3];
+				mmr_edge_nodes(m->meshId, edges[i], edgeNodes);
+				mmr_node_coor(m->meshId, edgeNodes[0], node0Coords);
+				mmr_node_coor(m->meshId, edgeNodes[1], node1Coords);
+				QVector3D l0(node0Coords[0], node0Coords[1], node0Coords[2]);
+				QVector3D l1(node1Coords[0], node1Coords[1], node1Coords[2]);
+				double l0Distance = QVector3D::dotProduct(pn, l0) - plane.w();
+				double l1Distance = QVector3D::dotProduct(pn, l1) - plane.w();
+				// Find intersection point
+				if (std::signbit(l0Distance) != std::signbit(l1Distance)) {
+					QVector3D l(l1 - l0);
+					QVector3D p0(pn * plane.w());
+					double ld = QVector3D::dotProduct(p0 - l0, pn) / QVector3D::dotProduct(l, pn);
+					QVector3D intersection = l0 + l * ld;
+					intersections.append(intersection);
+
+					//temp
+					double glob[3] = {intersection.x(), intersection.y(), intersection.z()};
+					int el[2] = {elementId, 0};
+					double xloc[3];
+					double sol[3];
+					apr_sol_xglob(pdv_heat_problem.ctrl.field_id, glob, 1, el, xloc, sol, NULL, NULL, NULL, APC_CLOSE, APE_SOL_XGLOB_CHECK_ONLY_GIVEN_ELEMENT);
+					CUTEHMI_WARNING(sol[0] << ", " << sol[1] << ", " << sol[2]);
+				}
+			}
+		}
+
+		// Construct triangle fan. Use last element as a reference node.
+		if (intersections.count() >= 3) {
+			QVector3D refNode = intersections.takeLast();
+			// Sort intersection nodes by angle between reference node.
+			std::sort(intersections.begin(), intersections.end(), [& refNode, & pn](const QVector3D & a, const QVector3D & b) {
+				QVector3D vA = a - refNode;
+				QVector3D vB = b - refNode;
+				// Cross product determines if vector A is to the "left" or to the "right" of vector B. Dot product of resulting
+				// cross product and plane normal is used to determine whether resulting cross product lies below the plane or above
+				// it.
+				return std::signbit(QVector3D::dotProduct(QVector3D(pn), QVector3D::crossProduct(vA, vB)));
+			});
+
+			while (intersections.count() > 1) {
+				appendAsRealVector(refNode, m->capsCoords);
+				appendAsRealVector(intersections.takeLast(), m->capsCoords);
+				appendAsRealVector(intersections.last(), m->capsCoords);
+				for (int i = 0; i < 3; i++)
+					appendAsRealVector(pn, m->capsNormals);
+			}
+		}
+		elementId = mmr_get_next_act_elem(m->meshId, elementId);
+	}
+
+	m->caps["coords"] = m->capsCoords;
+	m->caps["normals"] = m->capsNormals;
+	m->caps["count"] =  m->capsCoords.count() / (static_cast<int>(COORD_SIZE) * 3);
+
+	emit capsChanged();
+
+	// Reserve space for field arrays.
+	m->capTemperatures.reserve(m->caps["count"].toInt() * 3 * FREAL_SIZE);
+	m->capPressures.reserve(m->caps["count"].toInt() * 3 * FREAL_SIZE);
+	m->capVelocityMagnitudes.reserve(m->caps["count"].toInt() * 3 * FREAL_SIZE);
+	// @todo reset fields.
 }
 
 int ElementData::ProbeListCount(QQmlListProperty<AbstractProbe> * property)
@@ -632,6 +742,16 @@ void ElementData::updateFieldProperties()
 	m->quadFields["velocityMagnitudes"] = m->quadVelocities;
 	m->quadFields["triangleVelocityMagnitudes"] = m->quadTriangleVelocityMagnitudes;
 	emit quadFieldsChanged();
+
+	updateCapFieldProperties();
+}
+
+void ElementData::updateCapFieldProperties()
+{
+	m->capFields["temperatures"] = m->capTemperatures;
+	m->capFields["pressures"] = m->capPressures;
+	m->capFields["velocityMagnitudes"] = m->capVelocityMagnitudes;
+	emit capFieldsChanged();
 }
 
 void ElementData::clearFieldArrays()
@@ -645,6 +765,14 @@ void ElementData::clearFieldArrays()
 	m->triangleVelocityMagnitudes.clear();
 	m->quadVelocities.clear();
 	m->quadTriangleVelocityMagnitudes.clear();
+	clearCapFieldArrays();
+}
+
+void ElementData::clearCapFieldArrays()
+{
+	m->capTemperatures.clear();
+	m->capPressures.clear();
+	m->capVelocityMagnitudes.clear();
 }
 
 void ElementData::updateProperties()
@@ -808,6 +936,17 @@ void ElementData::appendVector(T * vector, QByteArray & array)
 template<std::size_t DIM, typename T>
 void ElementData::appendAsRealVector(T * vector, QByteArray & array)
 {
+	greal realVector[DIM];
+	for (std::size_t i = 0; i < DIM; i++)
+		realVector[i] = vector[i];
+
+	array.append(reinterpret_cast<char *>(realVector), sizeof(greal) * DIM);
+}
+
+void ElementData::appendAsRealVector(const QVector3D & vector, QByteArray & array)
+{
+	static constexpr std::size_t DIM = 3;
+
 	greal realVector[DIM];
 	for (std::size_t i = 0; i < DIM; i++)
 		realVector[i] = vector[i];
