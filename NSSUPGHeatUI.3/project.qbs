@@ -3,7 +3,7 @@ import qbs
 import cutehmi
 
 Project {
-	name: "ModFEM.NSSUPGHeatUI.2"
+	name: "ModFEM.NSSUPGHeatUI.3"
 
 	//	condition: false
 
@@ -24,6 +24,7 @@ Project {
          "BCColorMappers.qml",
          "CentrifugalFanEntity.qml",
          "ClipPlaneEntity.qml",
+		 "ColorRangesGroup.qml",
          "Console.qml",
          "ControlsGroup.qml",
          "CustomPhongAlphaMaterial.qml",
@@ -35,7 +36,7 @@ Project {
          "MeshInfo.qml",
          "NumberDisplayEntity.qml",
          "PhongAlphaClipMaterial.qml",
-		 "PressureColorMappers.qml",
+         "PressureColorMappers.qml",
          "ProbeEntity.qml",
          "ProblemGroup.qml",
          "ProblemInfo.qml",
@@ -60,6 +61,8 @@ Project {
          "images/keyboard-black-18dp.svg",
          "images/keyboard-white-18dp.svg",
          "models/fan.obj",
+         "models/motor.obj",
+         "models/rotor.obj",
          "shaders/es2/transparenttexture.frag",
          "shaders/es2/transparenttexture.vert",
          "shaders/gl3/pervertexcolorclip.frag",

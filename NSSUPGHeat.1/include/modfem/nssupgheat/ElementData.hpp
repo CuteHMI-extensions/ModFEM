@@ -8,6 +8,7 @@
 
 #include <QObject>
 #include <QQmlListProperty>
+#include <QMultiMap>
 
 namespace modfem {
 namespace nssupgheat {
@@ -35,6 +36,8 @@ class MODFEM_NSSUPGHEAT_API ElementData:
 
 		// Note: GL_QUADS have been removed from OpenGL, so quadFields offer 'triangleTemperatures' mapping.
 		Q_PROPERTY(QVariantMap quadFields READ quadFields NOTIFY quadFieldsChanged)
+
+		Q_PROPERTY(QVariantMap capFields READ capFields NOTIFY capFieldsChanged)
 
 		Q_PROPERTY(QVariantMap caps READ caps NOTIFY capsChanged)
 
@@ -68,6 +71,8 @@ class MODFEM_NSSUPGHEAT_API ElementData:
 
 		QVariantMap quadFields() const;
 
+		QVariantMap capFields() const;
+
 		QVariantMap caps() const;
 
 		double minTemperature() const;
@@ -98,6 +103,8 @@ class MODFEM_NSSUPGHEAT_API ElementData:
 		void assignFieldValues();
 
 		void assignFieldValues(int elementId);
+
+		void assignCapFields();
 
 		void updateProbes();
 
@@ -142,6 +149,7 @@ class MODFEM_NSSUPGHEAT_API ElementData:
 		typedef QList<AbstractProbe *> ProbeContainer;
 		typedef QHash<ScalarProbe *, std::pair<ScalarFieldContainer *, int>> ProbeScalarFieldNodeMap;
 		typedef QHash<Vector3Probe *, std::pair<Vector3FieldContainer *, int>> ProbeVector3FieldNodeMap;
+		typedef QVector<std::pair<int, QVector3D>> CapIntersectionsContainer;
 
 		// Dimension of coordinate.
 		static constexpr std::size_t COORD_DIM = 3;
@@ -267,6 +275,7 @@ class MODFEM_NSSUPGHEAT_API ElementData:
 			QVariantMap capFields;
 			QByteArray capsCoords;
 			QByteArray capsNormals;
+			CapIntersectionsContainer capIntersections;
 			QByteArray nodeCoords;
 			QByteArray lineCoords;
 			QByteArray triangleCoords;

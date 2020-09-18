@@ -62,6 +62,11 @@ QVariantMap ElementData::quadFields() const
 	return m->quadFields;
 }
 
+QVariantMap ElementData::capFields() const
+{
+	return m->capFields;
+}
+
 QVariantMap ElementData::caps() const
 {
 	return m->caps;
@@ -196,6 +201,7 @@ void ElementData::assignFieldValues()
 		assignFieldValues(elementId);
 		elementId = mmr_get_next_act_elem(m->meshId, elementId);
 	}
+	assignCapFields();
 }
 
 void ElementData::assignFieldValues(int elementId)
@@ -224,6 +230,32 @@ void ElementData::assignFieldValues(int elementId)
 	}
 }
 
+void ElementData::assignCapFields()
+{
+	for (int i = 0; i < m->capIntersections.size(); i++) {
+		int elementId = m->capIntersections.at(i).first;
+		QVector3D intersection = m->capIntersections.at(i).second;
+		double glob[3] = {intersection.x(), intersection.y(), intersection.z()};
+		int el[2] = {elementId, 0};
+		double xloc[3];
+		double sol[3];
+		apr_sol_xglob(pdv_heat_problem.ctrl.field_id, glob, 1, el, xloc, sol, NULL, NULL, NULL, APC_CLOSE, APE_SOL_XGLOB_CHECK_ONLY_GIVEN_ELEMENT);
+
+		appendScalar(sol[0], m->capTemperatures);
+
+//		apr_sol_xglob(pdv_ns_supg_problem.ctrl.field_id, glob, 1, el, xloc, sol, NULL, NULL, NULL, APC_CLOSE, APE_SOL_XGLOB_CHECK_ONLY_GIVEN_ELEMENT);
+//		CUTEHMI_WARNING(sol[0] << ", " << sol[1] << ", " << sol[2]);
+
+//		norm(m->nodeVelocities[elNodes[nodeIt]])
+
+//		appendScalar(norm({sol[0], sol[1], sol[2]}), m->capVelocityMagnitudes);
+//		appendScalar(sol[3], m->capPressures);
+
+//		m->capTemperatures[i] = sol[0];
+//		CUTEHMI_WARNING(sol[0] << ", " << sol[1] << ", " << sol[2]);
+	}
+}
+
 void ElementData::updateProbes()
 {
 	for (auto it = m->probeScalarFieldNodeMap.begin(); it != m->probeScalarFieldNodeMap.end(); ++it)
@@ -245,6 +277,7 @@ void ElementData::clip(const QVector4D & plane)
 	}
 
 	m->capsCoords.clear();
+	m->capIntersections.clear();
 
 	QVector3D pn(-plane);	// Invert plane normal.
 	int elNodes[MMC_MAXELVNO + 1] = {0};
@@ -283,20 +316,13 @@ void ElementData::clip(const QVector4D & plane)
 				double l0Distance = QVector3D::dotProduct(pn, l0) - plane.w();
 				double l1Distance = QVector3D::dotProduct(pn, l1) - plane.w();
 				// Find intersection point
+				// @todo fuzzy compare l0 and l1 as they may be parallel if std::signbit(l0Distance) == std::signbit(l1Distance).
 				if (std::signbit(l0Distance) != std::signbit(l1Distance)) {
 					QVector3D l(l1 - l0);
 					QVector3D p0(pn * plane.w());
 					double ld = QVector3D::dotProduct(p0 - l0, pn) / QVector3D::dotProduct(l, pn);
 					QVector3D intersection = l0 + l * ld;
 					intersections.append(intersection);
-
-					//temp
-					double glob[3] = {intersection.x(), intersection.y(), intersection.z()};
-					int el[2] = {elementId, 0};
-					double xloc[3];
-					double sol[3];
-					apr_sol_xglob(pdv_heat_problem.ctrl.field_id, glob, 1, el, xloc, sol, NULL, NULL, NULL, APC_CLOSE, APE_SOL_XGLOB_CHECK_ONLY_GIVEN_ELEMENT);
-					CUTEHMI_WARNING(sol[0] << ", " << sol[1] << ", " << sol[2]);
 				}
 			}
 		}
@@ -315,8 +341,11 @@ void ElementData::clip(const QVector4D & plane)
 			});
 
 			while (intersections.count() > 1) {
+				m->capIntersections.append(std::make_pair(elementId, refNode));
 				appendAsRealVector(refNode, m->capsCoords);
+				m->capIntersections.append(std::make_pair(elementId, intersections.last()));
 				appendAsRealVector(intersections.takeLast(), m->capsCoords);
+				m->capIntersections.append(std::make_pair(elementId, intersections.last()));
 				appendAsRealVector(intersections.last(), m->capsCoords);
 				for (int i = 0; i < 3; i++)
 					appendAsRealVector(pn, m->capsNormals);
@@ -331,11 +360,12 @@ void ElementData::clip(const QVector4D & plane)
 
 	emit capsChanged();
 
-	// Reserve space for field arrays.
+	// Reserve size for cap fields arrays.
 	m->capTemperatures.reserve(m->caps["count"].toInt() * 3 * FREAL_SIZE);
 	m->capPressures.reserve(m->caps["count"].toInt() * 3 * FREAL_SIZE);
 	m->capVelocityMagnitudes.reserve(m->caps["count"].toInt() * 3 * FREAL_SIZE);
-	// @todo reset fields.
+	clearCapFieldArrays();
+	updateCapFieldProperties();
 }
 
 int ElementData::ProbeListCount(QQmlListProperty<AbstractProbe> * property)

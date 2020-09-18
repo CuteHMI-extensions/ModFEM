@@ -72,6 +72,11 @@ Item {
 
 		onObjectAdded: {
 			object.elementData = Qt.binding(function() { return problem.elementData })
+			if (object.minimum !== undefined)
+				object.minimum = Qt.binding(function() { return colorRangesGroup.activeRange.minimum })
+			if (object.maximum !== undefined)
+				object.maximum = Qt.binding(function() { return colorRangesGroup.activeRange.maximum })
+
 			triangleColorMapper = object.triangle
 			quadTriangleColorMapper = object.quadTriangle
 			capColorMapper = object.cap
@@ -117,12 +122,15 @@ Item {
 							break
 						case 1:
 							colorMappersInstantiator.delegate = Qt.createComponent("TemperatureColorMappers.qml")
+							colorRangesGroup.activeRange = colorRangesGroup.temperature
 							break
 						case 2:
 							colorMappersInstantiator.delegate = Qt.createComponent("PressureColorMappers.qml")
+							colorRangesGroup.activeRange = colorRangesGroup.pressure
 							break
 						case 3:
 							colorMappersInstantiator.delegate = Qt.createComponent("VelocityColorMappers.qml")
+							colorRangesGroup.activeRange = colorRangesGroup.velocityMagnitude
 							break
 						}
 					}
@@ -199,7 +207,13 @@ Item {
 				}
 
 				ControlsGroup {
+					id: controlsGroup
+
 					problem: problem
+				}
+
+				ColorRangesGroup {
+					id: colorRangesGroup
 				}
 			}
 
@@ -260,13 +274,13 @@ Item {
 								ProbeEntity {
 									id: temperatureProbe1Entity
 
-									transform.translation.x: -5
+									transform.translation.x: 1
 								}
 
 								ProbeEntity {
 									id: velocityProbe1Entity
 
-									transform.translation.x: 5
+									transform.translation.x: -1
 								}
 
 								ArrowEntity {
@@ -277,29 +291,36 @@ Item {
 								}
 							}
 
-//							DuctModelEntity {
-//								id: ductModelEntity
-//							}
+							DuctModelEntity {
+								id: ductModelEntity
+
+								clipPlanesData: rootEntity.clipPlanesData
+							}
 
 							FanModelEntity {
 								id: fanModelEntity
+
+
+								running: controlsGroup.started
 							}
 
-//							CentrifugalFanEntity {
+							CentrifugalFanEntity {
+								fan.active: controlsGroup.started
 
-//							}
+								transform.translation: Qt.vector3d(fanModelEntity.transform.worldMatrix.column(3).x, elementsEntity.maxExtent.y + 1.0, elementsEntity.transform.worldMatrix.column(3).z)
+							}
 
 							NumberDisplayEntity {
 								display.value: temperatureProbe1.value
 
-								transform.translation: Qt.vector3d(temperatureProbe1Entity.transform.worldMatrix.column(3).x, elementsEntity.maxExtent.y + 2.5, temperatureProbe1Entity.transform.worldMatrix.column(3).z)
+								transform.translation: Qt.vector3d(temperatureProbe1Entity.transform.worldMatrix.column(3).x, elementsEntity.maxExtent.y + 1.0, temperatureProbe1Entity.transform.worldMatrix.column(3).z)
 							}
 							NumberDisplayEntity {
 
 								display.value: velocityProbe1.value.length()
 								display.unit: "m/s"
 
-								transform.translation: Qt.vector3d(velocityProbe1Entity.transform.worldMatrix.column(3).x, elementsEntity.maxExtent.y + 2.5, velocityProbe1Entity.transform.worldMatrix.column(3).z)
+								transform.translation: Qt.vector3d(velocityProbe1Entity.transform.worldMatrix.column(3).x, elementsEntity.maxExtent.y + 1.0, velocityProbe1Entity.transform.worldMatrix.column(3).z)
 							}
 						}
 //					}
