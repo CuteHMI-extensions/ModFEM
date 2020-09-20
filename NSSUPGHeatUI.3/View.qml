@@ -33,10 +33,24 @@ Item {
 				field: "temperature"
 			},
 
+			ScalarProbe {
+				id: temperatureProbe2
+
+				position: temperatureProbe2Entity.transform.translation
+				field: "temperature"
+			},
+
 			Vector3Probe {
 				id: velocityProbe1
 
 				position: velocityProbe1Entity.transform.translation
+				field: "velocity"
+			},
+
+			Vector3Probe {
+				id: velocityProbe2
+
+				position: velocityProbe2Entity.transform.translation
 				field: "velocity"
 			}
 		]
@@ -171,9 +185,9 @@ Item {
 				}
 
 				ComboBox {
-					model: ["Elements", "Clip plane", "Temperature probe 1", "Velocity probe 1", "Fan"]
+					model: ["Elements", "Clip plane", "Temperature probe 1", "Temperature probe 1", "Velocity probe 1", "Velocity probe 2", "Fan"]
 
-					property var entities: [elementsEntity, clipPlane0Entity, temperatureProbe1Entity, velocityProbe1Entity, fanModelEntity]
+					property var entities: [elementsEntity, clipPlane0Entity, temperatureProbe1Entity, temperatureProbe2Entity, velocityProbe1Entity, velocityProbe2Entity, fanModelEntity]
 
 					onCurrentIndexChanged: settingsLayout.transformEntity = entities[currentIndex]
 				}
@@ -278,9 +292,21 @@ Item {
 								}
 
 								ProbeEntity {
+									id: temperatureProbe2Entity
+
+									transform.translation.x: -1
+								}
+
+								ProbeEntity {
 									id: velocityProbe1Entity
 
 									transform.translation.x: -1
+								}
+
+								ProbeEntity {
+									id: velocityProbe2Entity
+
+									transform.translation.x: 3
 								}
 
 								ArrowEntity {
@@ -315,12 +341,25 @@ Item {
 
 								transform.translation: Qt.vector3d(temperatureProbe1Entity.transform.worldMatrix.column(3).x, elementsEntity.maxExtent.y + 1.0, temperatureProbe1Entity.transform.worldMatrix.column(3).z)
 							}
-							NumberDisplayEntity {
 
+							NumberDisplayEntity {
+								display.value: temperatureProbe2.value
+
+								transform.translation: Qt.vector3d(temperatureProbe2Entity.transform.worldMatrix.column(3).x, elementsEntity.minExtent.y-+ 1.0, temperatureProbe2Entity.transform.worldMatrix.column(3).z)
+							}
+
+							NumberDisplayEntity {
 								display.value: velocityProbe1.value.length()
 								display.unit: "m/s"
 
 								transform.translation: Qt.vector3d(velocityProbe1Entity.transform.worldMatrix.column(3).x, elementsEntity.maxExtent.y + 1.0, velocityProbe1Entity.transform.worldMatrix.column(3).z)
+							}
+
+							NumberDisplayEntity {
+								display.value: velocityProbe2.value.length()
+								display.unit: "m/s"
+
+								transform.translation: Qt.vector3d(velocityProbe2Entity.transform.worldMatrix.column(3).x, elementsEntity.maxExtent.y + 1.0, velocityProbe2Entity.transform.worldMatrix.column(3).z)
 							}
 						}
 //					}
